@@ -1,0 +1,39 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/game_controller.gd" id="1_tbgi4"]
+[ext_resource type="Script" path="res://scripts/world.gd" id="2_tefeu"]
+[ext_resource type="PackedScene" path="res://scenes/planet.tscn" id="3_o6xl0"]
+[ext_resource type="Script" path="res://scripts/player.gd" id="5_85g3d"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_choun"]
+radius = 12.0
+
+[node name="Main" type="Node2D" unique_id=1538353141 node_paths=PackedStringArray("world", "player", "debug_label")]
+script = ExtResource("1_tbgi4")
+world = NodePath("World")
+player = NodePath("Player")
+debug_label = NodePath("DebugLabel")
+
+[node name="World" type="Node2D" parent="." unique_id=2068908855]
+script = ExtResource("2_tefeu")
+planet_scene = ExtResource("3_o6xl0")
+
+[node name="TestPlanet" type="Area2D" parent="World" unique_id=759353032 instance=ExtResource("3_o6xl0")]
+position = Vector2(620, 360)
+
+[node name="Player" type="Area2D" parent="." unique_id=488482243]
+position = Vector2(180, 270)
+script = ExtResource("5_85g3d")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Player" unique_id=285675620]
+shape = SubResource("CircleShape2D_choun")
+
+[node name="Ship" type="Polygon2D" parent="Player" unique_id=1487983402]
+color = Color(0.3, 0.9, 1, 1)
+polygon = PackedVector2Array(14, 0, -10, -9, -10, 9)
+
+[node name="DebugLabel" type="Label" parent="." unique_id=1203309656]
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 10.0
+offset_bottom = 10.0

@@ -1,0 +1,12 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/planet.gd" id="1_cktii"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_h8ms6"]
+radius = 35.0
+
+[node name="Planet" type="Area2D" unique_id=759353032]
+script = ExtResource("1_cktii")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1721560820]
+shape = SubResource("CircleShape2D_h8ms6")
