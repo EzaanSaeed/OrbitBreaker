@@ -2,5 +2,6 @@
 .godot/
 /android/
 
-# Export output
-/build/
+# Export output (keep build/.gdignore so Godot never imports old builds)
+/build/*
+!/build/.gdignore
