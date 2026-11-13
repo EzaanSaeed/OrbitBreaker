@@ -3,10 +3,7 @@
 [ext_resource type="Script" uid="uid://kowef8cxp3g8" path="res://scripts/game_controller.gd" id="1_tbgi4"]
 [ext_resource type="Script" uid="uid://h4qrra7j4a5u" path="res://scripts/world.gd" id="2_tefeu"]
 [ext_resource type="PackedScene" path="res://scenes/planet.tscn" id="3_o6xl0"]
-[ext_resource type="Script" uid="uid://by0affbomwukq" path="res://scripts/player.gd" id="5_85g3d"]
-
-[sub_resource type="CircleShape2D" id="CircleShape2D_choun"]
-radius = 12.0
+[ext_resource type="PackedScene" uid="uid://chwteiu1ea47r" path="res://scenes/player.tscn" id="5_85g3d"]
 
 [node name="Main" type="Node2D" unique_id=1538353141 node_paths=PackedStringArray("world", "player", "debug_label")]
 script = ExtResource("1_tbgi4")
@@ -21,16 +18,8 @@ planet_scene = ExtResource("3_o6xl0")
 [node name="TestPlanet" parent="World" unique_id=759353032 instance=ExtResource("3_o6xl0")]
 position = Vector2(620, 360)
 
-[node name="Player" type="Area2D" parent="." unique_id=488482243]
+[node name="Player" parent="." unique_id=488482243 instance=ExtResource("5_85g3d")]
 position = Vector2(180, 270)
-script = ExtResource("5_85g3d")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Player" unique_id=285675620]
-shape = SubResource("CircleShape2D_choun")
-
-[node name="Ship" type="Polygon2D" parent="Player" unique_id=1487983402]
-color = Color(0.3, 0.9, 1, 1)
-polygon = PackedVector2Array(14, 0, -10, -9, -10, 9)
 
 [node name="DebugLabel" type="Label" parent="." unique_id=1203309656]
 offset_left = 10.0
