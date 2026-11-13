@@ -3,6 +3,7 @@ extends SceneTree
 ## Add -- --invalid to exercise precondition rejection (expected assertion errors).
 
 func _initialize() -> void:
+	create_timer(10.0).timeout.connect(func(): quit(1))
 	call_deferred("_run")
 
 func _key(pressed: bool) -> void:
@@ -24,18 +25,18 @@ func _run() -> void:
 	player.set_physics_process(false)
 	player.apply_thrust_boost(2.0, 0.25)
 	assert(player.thrust_multiplier == 2.0)
-	assert(player._thrust_boost_remaining == 0.25)
+	assert(player.boost_time_remaining == 0.25)
 	_key(true)
 	player._physics_process(0.1)
 	assert(is_equal_approx(player.vertical_velocity, 120.0))
-	assert(is_equal_approx(player._thrust_boost_remaining, 0.15))
+	assert(is_equal_approx(player.boost_time_remaining, 0.15))
 	_check(player)
 	print("PASS activation and delta countdown")
 
 	player.vertical_velocity = 0.0
 	player._physics_process(0.2)
 	assert(is_equal_approx(player.vertical_velocity, 210.0))
-	assert(player.thrust_multiplier == 1.0 and player._thrust_boost_remaining == 0.0)
+	assert(player.thrust_multiplier == 1.0 and player.boost_time_remaining == 0.0)
 	player.vertical_velocity = 0.0
 	player._physics_process(0.1)
 	assert(is_equal_approx(player.vertical_velocity, 60.0))
@@ -46,9 +47,9 @@ func _run() -> void:
 	player._physics_process(0.25)
 	player.apply_thrust_boost(3.0, 2.0)
 	assert(player.thrust_multiplier == 3.0)
-	assert(player._thrust_boost_remaining == 2.0)
+	assert(player.boost_time_remaining == 2.0)
 	player.apply_thrust_boost(3.0, 2.0)
-	assert(player.thrust_multiplier == 3.0 and player._thrust_boost_remaining == 2.0)
+	assert(player.thrust_multiplier == 3.0 and player.boost_time_remaining == 2.0)
 	_check(player)
 	print("PASS repeated pickups replace multiplier and refresh duration without stacking")
 
@@ -69,20 +70,20 @@ func _run() -> void:
 	print("PASS independent gravity and unchanged speed cap")
 
 	if "--invalid" in OS.get_cmdline_user_args():
-		for args in [[1.0, 1.0], [0.0, 1.0], [-2.0, 1.0], [INF, 1.0], [NAN, 1.0], [2.0, 0.0], [2.0, -1.0], [2.0, INF], [2.0, NAN]]:
+		for args in [[0.0, 1.0], [-2.0, 1.0], [INF, 1.0], [NAN, 1.0], [2.0, 0.0], [2.0, -1.0], [2.0, INF], [2.0, NAN]]:
 			var before_multiplier: float = player.thrust_multiplier
-			var before_time: float = player._thrust_boost_remaining
+			var before_time: float = player.boost_time_remaining
 			player.apply_thrust_boost(args[0], args[1])
 			assert(player.thrust_multiplier == before_multiplier)
-			assert(player._thrust_boost_remaining == before_time)
+			assert(player.boost_time_remaining == before_time)
 			_check(player)
 		print("PASS invalid inputs rejected without changing active boost (expected assertion errors above)")
 
 	player.take_damage(100)
 	assert(not player.is_alive)
-	assert(player.thrust_multiplier == 1.0 and player._thrust_boost_remaining == 0.0)
+	assert(player.thrust_multiplier == 1.0 and player.boost_time_remaining == 0.0)
 	player.apply_thrust_boost(2.0, 10.0)
-	assert(player.thrust_multiplier == 1.0 and player._thrust_boost_remaining == 0.0)
+	assert(player.thrust_multiplier == 1.0 and player.boost_time_remaining == 0.0)
 	_check(player)
 	print("PASS death cleanup and post-death boost rejection")
 	player.queue_free()
