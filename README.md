@@ -34,6 +34,14 @@ OrbitBreaker/
 └── project.godot
 ```
 
+## 🌐 Web build
+
+1. In Godot: **Editor → Manage Export Templates** → install templates for your Godot version (4.7.2).
+2. **Project → Export… → Web → Export Project** (writes `build/web/index.html`), or from a terminal:
+   `godot --headless --path . --export-release "Web" build/web/index.html`
+3. Test locally: `cd build/web && python3 -m http.server 8000`, then open http://localhost:8000.
+4. For itch.io, zip the *contents* of `build/web/` (so `index.html` is at the top of the zip) and upload it as an HTML game.
+
 ## 🚧 Development Status
 
 Currently in development for a 24-hour game jam.
