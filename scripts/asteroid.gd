@@ -17,7 +17,8 @@ extends Area2D
 	set(value):
 		radius = value
 		_build_outline()
-@export var collision_damage: int = 1
+## Health scale is 0–100 (Spaceship.max_health), so 25 = four hits to die.
+@export var collision_damage: int = 25
 ## Placeholder look until real art exists.
 @export var color: Color = Color(0.55, 0.52, 0.48):
 	set(value):

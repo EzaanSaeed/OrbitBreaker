@@ -3,7 +3,8 @@ extends PowerUp
 ## Pickup that restores health, capped at max_health.
 ## Owner: Developer B (proposed). Source: Domain Model V3, §3.
 
-@export var healing_amount: int = 1
+## Health scale is 0–100 (Spaceship.max_health), so 25 = undoes one asteroid hit.
+@export var healing_amount: int = 25
 
 
 func _ready() -> void:

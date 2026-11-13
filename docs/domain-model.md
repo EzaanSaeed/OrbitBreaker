@@ -15,7 +15,9 @@ Source: *Orbit Breaker Domain Model V3* (Developer B). This file records what wa
 | Spawn ownership | World / Developer A |
 | Effect ownership | Spaceship / Developer B |
 
-Still tunable: initial health, asteroid damage, healing amount, boost duration, scroll-speed curve, spawn probabilities, gravity/thrust values.
+**Health scale (decided by Developer A after reviewing `feature/player-controls`):** `max_health = 100` (Developer B's value), asteroid `collision_damage = 25` (four hits to die), HealthBooster `healing_amount = 25` (undoes one hit).
+
+Still tunable: boost duration, scroll-speed curve, spawn probabilities, gravity/thrust values (Developer B's player uses thrust 600, max speed 300).
 
 ## Files
 
