@@ -1,23 +1,34 @@
+@tool
 class_name Planet
 extends Area2D
 ## A gravity source and instant-death collision hazard.
 ## Owner: Developer A. Source: Domain Model V3, §3.
 ##
 ## Collision rule (approved): touching a planet kills the ship regardless of health.
+##
+## @tool so planets are drawn in the editor too; gameplay code only runs in game.
 
-@export var radius: float = 35.0
+@export var radius: float = 35.0:
+	set(value):
+		radius = value
+		queue_redraw()
 ## Tunable. At 100 px, 350 000 gives ~35 px/s² against 650 px/s² of thrust,
 ## which may feel weak. Tune during playtesting.
 @export var gravity_strength: float = 350000.0
 ## Floor on distance² so gravity stays finite when the ship is very close.
 @export var min_distance_squared: float = 2500.0
 ## Placeholder look until real art exists.
-@export var color: Color = Color(0.55, 0.35, 0.85)
+@export var color: Color = Color(0.55, 0.35, 0.85):
+	set(value):
+		color = value
+		queue_redraw()
 
 @onready var _collision_shape: CollisionShape2D = $CollisionShape2D
 
 
 func _ready() -> void:
+	if Engine.is_editor_hint():
+		return
 	validate_state()
 	# Each planet gets its own circle so the hitbox always matches `radius`.
 	var shape := CircleShape2D.new()

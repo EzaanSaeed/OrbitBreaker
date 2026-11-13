@@ -1,0 +1,12 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/asteroid.gd" id="1_akfqu"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_6mo6b"]
+radius = 14.0
+
+[node name="Asteroid" type="Area2D" unique_id=855255867]
+script = ExtResource("1_akfqu")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1927708142]
+shape = SubResource("CircleShape2D_6mo6b")

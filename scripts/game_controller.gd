@@ -37,7 +37,6 @@ var game_state: GameState = GameState.RUNNING
 var distance_score: float = 0.0
 var scroll_speed: float = 0.0
 
-var _spawn_timer: float = 0.0
 var _last_gravity: float = 0.0
 
 
@@ -60,7 +59,8 @@ func _physics_process(delta: float) -> void:
 		return
 	world.update_world(delta, scroll_speed)
 	world.remove_offscreen_objects()
-	_update_spawning(delta)
+	if spawning_enabled:
+		world.update_spawning(delta)
 	if player != null and player.is_alive:
 		_last_gravity = world.get_total_gravity_at(player.global_position)
 		player.apply_gravity(_last_gravity)
@@ -73,20 +73,12 @@ func _physics_process(delta: float) -> void:
 	# Collision handling (planet/asteroid/power-up) is still to be agreed — see docs/domain-model.md.
 
 
-func _update_spawning(delta: float) -> void:
-	if not spawning_enabled:
-		return
-	_spawn_timer += delta
-	if _spawn_timer >= world.spawn_interval:
-		_spawn_timer -= world.spawn_interval
-		world.spawn_planet()
-
-
 func _update_debug_label() -> void:
 	if debug_label == null:
 		return
-	debug_label.text = "score %d   speed %.0f   planets %d   gravity on ship %+.1f px/s²" % [
-		get_display_score(), scroll_speed, world.active_planets.size(), _last_gravity]
+	debug_label.text = "score %d   speed %.0f   planets %d   asteroids %d   power-ups %d   gravity on ship %+.1f px/s²" % [
+		get_display_score(), scroll_speed, world.active_planets.size(),
+		world.active_asteroids.size(), world.active_powerups.size(), _last_gravity]
 
 
 ## Advance distance. Has no effect once the run is over.

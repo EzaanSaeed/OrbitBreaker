@@ -1,3 +1,4 @@
+@tool
 class_name Asteroid
 extends Area2D
 ## An obstacle that damages the ship's health instead of ending the run outright.
@@ -8,17 +9,54 @@ extends Area2D
 ##     if asteroid.is_active:
 ##         player.take_damage(asteroid.get_collision_damage())
 ##         asteroid.deactivate()
+##
+## @tool so asteroids are drawn in the editor too; gameplay code only runs in game.
 
-@export var radius: float = 14.0
+## Hitbox radius. World randomises this per spawn before adding the asteroid.
+@export var radius: float = 14.0:
+	set(value):
+		radius = value
+		_build_outline()
 @export var collision_damage: int = 1
+## Placeholder look until real art exists.
+@export var color: Color = Color(0.55, 0.52, 0.48):
+	set(value):
+		color = value
+		queue_redraw()
+## Maximum spin in radians per second (direction and speed are random).
+@export var max_spin: float = 1.5
 
 ## False after the first impact. (Not listed in V3, but needed to enforce "a
 ## single collision must not inflict repeated damage".)
 var is_active: bool = true
 
+var _outline: PackedVector2Array = PackedVector2Array()
+var _spin: float = 0.0
+
+@onready var _collision_shape: CollisionShape2D = $CollisionShape2D
+
 
 func _ready() -> void:
+	_build_outline()
+	if Engine.is_editor_hint():
+		return
 	validate_state()
+	# Each asteroid gets its own circle so the hitbox always matches `radius`.
+	var shape := CircleShape2D.new()
+	shape.radius = radius
+	_collision_shape.shape = shape
+	_spin = randf_range(-max_spin, max_spin)
+
+
+func _physics_process(delta: float) -> void:
+	if Engine.is_editor_hint():
+		return
+	rotation += _spin * delta
+
+
+func _draw() -> void:
+	if _outline.size() >= 3:
+		draw_colored_polygon(_outline, color)
 
 
 func get_collision_damage() -> int:
@@ -49,3 +87,14 @@ func is_offscreen() -> bool:
 func validate_state() -> void:
 	assert(radius > 0.0)
 	assert(collision_damage >= 0)
+
+
+## Lumpy outline around the hitbox circle (between 85% and 110% of radius).
+func _build_outline() -> void:
+	var points := PackedVector2Array()
+	var count := 9
+	for i in count:
+		var angle := TAU * i / count
+		points.append(Vector2.from_angle(angle) * radius * randf_range(0.85, 1.1))
+	_outline = points
+	queue_redraw()
