@@ -1,0 +1,13 @@
+[gd_scene format=3 uid="uid://chwteiu1ea47r"]
+
+[ext_resource type="Script" uid="uid://by0affbomwukq" path="res://scripts/player.gd" id="1_3vyb7"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_player"]
+radius = 12.0
+
+[node name="Player" type="Area2D" unique_id=141498202]
+process_physics_priority = 100
+script = ExtResource("1_3vyb7")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=110218366]
+shape = SubResource("CircleShape2D_player")
