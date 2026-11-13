@@ -51,5 +51,12 @@ These were needed to make V3 implementable. None changes gameplay.
 
 - **Collision dispatch owner.** Who detects overlaps and calls `die()` / `take_damage()` + `deactivate()` / `collect()`? Proposal: Spaceship's `area_entered` handler (Developer B), checking the type of the area it touched.
 - **PowerUp base file owner.**
-- **Input action names** (`thrust_up` / `thrust_down` proposed, mapped to W/Up and S/Down).
-- **Viewport** 960×540 still has to be set in `project.godot`.
+- **Input action names:** `thrust_up` (W/Up) and `thrust_down` (S/Down) are now in `project.godot`; Developer B to confirm.
+
+## Done in `project.godot`
+
+960×540 viewport, `scenes/main.tscn` as the startup scene, dark background colour, and the two input actions.
+
+## Main scene (temporary parts)
+
+`main.tscn` has a **placeholder `Player` node** (Spaceship script, radius-12 circle, cyan triangle) and a **`DebugLabel`** showing score, speed, planet count and gravity on the ship. When Developer B's `player.tscn` is merged, replace the placeholder with an instance of it and re-assign GameController's `player` export. Delete `DebugLabel` once the HUD exists.

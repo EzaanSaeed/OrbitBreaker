@@ -11,10 +11,22 @@ extends Area2D
 @export var gravity_strength: float = 350000.0
 ## Floor on distance² so gravity stays finite when the ship is very close.
 @export var min_distance_squared: float = 2500.0
+## Placeholder look until real art exists.
+@export var color: Color = Color(0.55, 0.35, 0.85)
+
+@onready var _collision_shape: CollisionShape2D = $CollisionShape2D
 
 
 func _ready() -> void:
 	validate_state()
+	# Each planet gets its own circle so the hitbox always matches `radius`.
+	var shape := CircleShape2D.new()
+	shape.radius = radius
+	_collision_shape.shape = shape
+
+
+func _draw() -> void:
+	draw_circle(Vector2.ZERO, radius, color)
 
 
 ## Signed vertical acceleration this planet applies to a ship at ship_position.

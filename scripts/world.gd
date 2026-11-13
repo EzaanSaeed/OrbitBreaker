@@ -28,12 +28,26 @@ var active_powerups: Array[PowerUp] = []
 
 func _ready() -> void:
 	validate_state()
+	# Track objects placed in the editor (e.g. a test planet) like spawned ones.
+	for child in get_children():
+		if child is Planet:
+			active_planets.append(child)
+		elif child is Asteroid:
+			active_asteroids.append(child)
+		elif child is PowerUp:
+			active_powerups.append(child)
 
 
+## Spawn a planet just off the right edge at a random height in the play area.
 func spawn_planet() -> Planet:
-	# TODO(Dev A, Logic stage): instantiate planet_scene at (spawn_x, random y in
-	# [spawn_y_min, spawn_y_max]), add_child, append to active_planets.
-	return null
+	if planet_scene == null:
+		push_error("World.planet_scene is not set")
+		return null
+	var planet := planet_scene.instantiate() as Planet
+	planet.position = Vector2(spawn_x, randf_range(spawn_y_min, spawn_y_max))
+	add_child(planet)
+	active_planets.append(planet)
+	return planet
 
 
 func spawn_asteroid() -> Asteroid:

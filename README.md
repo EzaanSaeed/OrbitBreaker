@@ -27,10 +27,10 @@ As you progress, the game becomes increasingly challenging.
 ## 📁 Project Structure
 
 ```text
-orbit-breaker/
-├── assets/
-├── scenes/
-├── scripts/
+OrbitBreaker/
+├── scenes/       # main.tscn (startup), planet.tscn
+├── scripts/      # one script per domain class (see docs/domain-model.md)
+├── docs/         # domain model, decisions and open questions
 └── project.godot
 ```
 
@@ -40,4 +40,4 @@ Currently in development for a 24-hour game jam.
 
 ## 👥 Team
 
-Developed by a team of three programmers.
+Developed by a team of two programmers.

@@ -23,33 +23,70 @@ enum GameState { RUNNING, GAME_OVER }
 @export var play_area_top: float = 0.0
 @export var play_area_bottom: float = 540.0
 
-## Wired in main.tscn during the Logic stage.
+## Turn off to test against hand-placed planets only.
+@export var spawning_enabled: bool = true
+
+## Wired in main.tscn. player and hud may be null until Developer B's scenes land.
 @export var world: World
 @export var player: Spaceship
 @export var hud: HUD
+## TEMPORARY: on-screen readout for testing until the HUD exists. Delete with the node.
+@export var debug_label: Label
 
 var game_state: GameState = GameState.RUNNING
 var distance_score: float = 0.0
 var scroll_speed: float = 0.0
 
+var _spawn_timer: float = 0.0
+var _last_gravity: float = 0.0
+
 
 func _ready() -> void:
 	scroll_speed = initial_scroll_speed
+	# Run before the Spaceship each physics frame so gravity lands before it moves.
 	process_physics_priority = -1
 	validate_state()
-	# TODO(Dev A, Logic stage): connect player.player_died -> handle_player_death,
-	# player.health_changed -> hud.update_health, hud.restart_requested -> restart_game.
+	assert(world != null, "GameController.world is not assigned in main.tscn")
+	if player != null:
+		player.player_died.connect(handle_player_death)
+		if hud != null:
+			player.health_changed.connect(hud.update_health)
+	if hud != null:
+		hud.restart_requested.connect(restart_game)
 
 
-# TODO(Dev A, Logic stage): _physics_process(delta). While RUNNING:
-#   1. world.update_world(delta, scroll_speed)
-#   2. world.remove_offscreen_objects()
-#   3. player.apply_gravity(world.get_total_gravity_at(player.global_position))
-#   4. spawn timer -> world.spawn_*()
-#   5. update_score(delta); update_difficulty(delta)
-#   6. check_boundaries()
-#   7. hud.update_score(get_display_score())
-# Collision handling (planet/asteroid/power-up) is still to be agreed — see docs/domain-model.md.
+func _physics_process(delta: float) -> void:
+	if game_state != GameState.RUNNING:
+		return
+	world.update_world(delta, scroll_speed)
+	world.remove_offscreen_objects()
+	_update_spawning(delta)
+	if player != null and player.is_alive:
+		_last_gravity = world.get_total_gravity_at(player.global_position)
+		player.apply_gravity(_last_gravity)
+	update_score(delta)
+	update_difficulty(delta)
+	check_boundaries()
+	if hud != null:
+		hud.update_score(get_display_score())
+	_update_debug_label()
+	# Collision handling (planet/asteroid/power-up) is still to be agreed — see docs/domain-model.md.
+
+
+func _update_spawning(delta: float) -> void:
+	if not spawning_enabled:
+		return
+	_spawn_timer += delta
+	if _spawn_timer >= world.spawn_interval:
+		_spawn_timer -= world.spawn_interval
+		world.spawn_planet()
+
+
+func _update_debug_label() -> void:
+	if debug_label == null:
+		return
+	debug_label.text = "score %d   speed %.0f   planets %d   gravity on ship %+.1f px/s²" % [
+		get_display_score(), scroll_speed, world.active_planets.size(), _last_gravity]
 
 
 ## Advance distance. Has no effect once the run is over.
