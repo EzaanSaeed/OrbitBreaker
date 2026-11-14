@@ -14,14 +14,17 @@ extends Node2D
 ## Developer B's booster scenes. While both are empty, no power-ups spawn.
 @export var health_booster_scene: PackedScene
 @export var thruster_booster_scene: PackedScene
+## Developer B's ammo pickup (+15 bullets). Empty = no ammo pickups spawn.
+@export var bullet_pickup_scene: PackedScene
 
 @export_group("Spawn timing")
 ## Seconds between planet spawn attempts. Tunable.
 @export var spawn_interval: float = 3.0
 ## Seconds between asteroid spawn attempts. Tunable.
 @export var asteroid_spawn_interval: float = 1.5
-## Seconds between power-up spawn attempts. Tunable.
-@export var powerup_spawn_interval: float = 8.0
+## Seconds between power-up spawn attempts. PROVISIONAL: 6 s, with three
+## pickup types sharing it equally (health / fuel / ammo).
+@export var powerup_spawn_interval: float = 6.0
 
 @export_group("Spawn area")
 ## Spawn just past the right edge of the 960 px viewport.
@@ -123,14 +126,16 @@ func spawn_asteroid() -> Asteroid:
 	return asteroid
 
 
-## Spawn a random booster at a free height. Returns null if Developer B's
-## booster scenes aren't assigned yet, or if no fair spot was found.
+## Spawn a random pickup (health, fuel or ammo, equally likely) at a free height.
+## Returns null if no pickup scenes are assigned, or if no fair spot was found.
 func spawn_powerup() -> PowerUp:
 	var choices: Array[PackedScene] = []
 	if health_booster_scene != null:
 		choices.append(health_booster_scene)
 	if thruster_booster_scene != null:
 		choices.append(thruster_booster_scene)
+	if bullet_pickup_scene != null:
+		choices.append(bullet_pickup_scene)
 	if choices.is_empty():
 		return null
 	var y := _find_free_spawn_y(powerup_clearance_radius, spawn_y_min, spawn_y_max)
