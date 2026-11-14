@@ -23,6 +23,7 @@ signal restart_requested
 @onready var _game_over: Control = $Layout/GameOverPanel
 @onready var _final_score: Label = $Layout/GameOverPanel/Center/Card/Padding/Content/FinalScore
 @onready var _restart: Button    = $Layout/GameOverPanel/Center/Card/Padding/Content/RestartButton
+@onready var _return_to_menu: Button = $Layout/GameOverPanel/Center/Card/Padding/Content/ReturnButton
 
 # ── Internal state ────────────────────────────────────────────────────────────
 var _health_tween: Tween
@@ -43,6 +44,8 @@ var _fuel_fill_low: StyleBoxFlat
 
 func _ready() -> void:
 	_restart.pressed.connect(func(): restart_requested.emit())
+	_return_to_menu.pressed.connect(func():
+		get_tree().change_scene_to_file("res://scenes/MainMenu.tscn"))
 	_game_over.hide()
 	set_process(false)
 	_build_dynamic_styles()

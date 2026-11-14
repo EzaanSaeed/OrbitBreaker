@@ -317,3 +317,15 @@ theme_override_styles/pressed = SubResource("ButtonHover")
 theme_override_styles/hover = SubResource("ButtonHover")
 theme_override_styles/focus = SubResource("ButtonFocus")
 text = "RESTART"
+
+[node name="ReturnButton" type="Button" parent="Layout/GameOverPanel/Center/Card/Padding/Content" unique_id=1693941738]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.9, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("ButtonNormal")
+theme_override_styles/pressed = SubResource("ButtonHover")
+theme_override_styles/hover = SubResource("ButtonHover")
+theme_override_styles/focus = SubResource("ButtonFocus")
+text = "RETURN TO MENU"
