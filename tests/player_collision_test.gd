@@ -142,6 +142,7 @@ func _run() -> void:
 	assert(heal.is_collected and player.health == 75)
 	# ThrusterBooster now refills fuel (+50, capped) instead of a 1.5x thrust boost.
 	player.fuel.refill(player.fuel.max_fuel)      # earlier thrust used some fuel
+	player.fuel.drain_per_second = 5.0            # fixed rate: tests mechanics, not tuning
 	player.fuel.drain(14.0)                       # 5/s for 14 s -> 30 fuel left
 	var boost = load("res://scripts/thruster_booster.gd").new()
 	_add_pickup(fixture, boost)

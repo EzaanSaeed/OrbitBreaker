@@ -47,10 +47,10 @@ var bonus_score: int = 0
 var scroll_speed: float = 0.0
 ## 1.0 until top speed is reached, then rises towards max_spawn_rate_scale.
 var spawn_rate_scale: float = 1.0
-## Drag on the ship's vertical movement, per second (0 = none: the ship keeps
-## drifting until thrust or gravity changes it). Set by the debug-only tuning
-## presets; applied here so Developer B's player.gd stays untouched.
-var ship_damping: float = 0.0
+## Drag on the ship's vertical movement, per second: after letting go, drift
+## halves in ~0.35 s instead of sliding forever (0 = no drag). Chosen in playtest
+## 2026-11-14. Applied here so Developer B's player.gd stays untouched.
+@export var ship_damping: float = 2.0
 
 ## Instance ids of asteroids that already earned a bonus this run (never twice).
 var _bonus_awarded: Dictionary = {}

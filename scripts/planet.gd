@@ -12,10 +12,11 @@ extends Area2D
 	set(value):
 		radius = value
 		queue_redraw()
-## Tunable. 1 500 000 gives ~150 px/s² at 100 px and ~600 px/s² (= ship thrust)
-## at 50 px. Measured: ignoring a planet that passes within ~130 px pulls you in;
-## steering away from 300 px out escapes even a planet 50 px off your line.
-@export var gravity_strength: float = 1500000.0
+## Default pull. 2 250 000 (x1.5 of the original 1 500 000, chosen in playtest
+## 2026-11-14 together with ship drag 2.0 / thrust 750 / top speed 320) gives
+## ~225 px/s² at 100 px against 750 px/s² of thrust.
+const DEFAULT_GRAVITY_STRENGTH := 2250000.0
+@export var gravity_strength: float = DEFAULT_GRAVITY_STRENGTH
 ## Floor on distance² so gravity stays finite when the ship is very close.
 @export var min_distance_squared: float = 2500.0
 ## Placeholder look until real art exists.

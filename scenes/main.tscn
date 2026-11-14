@@ -30,6 +30,8 @@ bullet_pickup_scene = ExtResource("10_ammo")
 
 [node name="Player" parent="." unique_id=488482243 instance=ExtResource("5_85g3d")]
 position = Vector2(180, 270)
+thrust_power = 750.0
+max_vertical_speed = 320.0
 
 [node name="HUD" parent="." unique_id=1203309656 instance=ExtResource("6_hud")]
 

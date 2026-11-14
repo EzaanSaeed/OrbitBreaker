@@ -20,11 +20,14 @@ extends Node2D
 @export_group("Spawn timing")
 ## Seconds between planet spawn attempts. Tunable.
 @export var spawn_interval: float = 3.0
-## Seconds between asteroid spawn attempts. Tunable.
-@export var asteroid_spawn_interval: float = 1.5
-## Seconds between power-up spawn attempts, shared equally by the three pickup
-## types (health / fuel / ammo). Tuned with fuel: 8 s made fuel run dry sooner.
-@export var powerup_spawn_interval: float = 6.0
+## Seconds between asteroid spawn attempts (was 1.5 before 2026-11-14 playtest).
+@export var asteroid_spawn_interval: float = 1.0
+## Seconds between power-up spawn attempts (was 6 s before 2026-11-14 playtest).
+@export var powerup_spawn_interval: float = 4.0
+## Relative chance of each pickup type. Fuel pickups are twice as likely.
+@export var health_pickup_weight: float = 1.0
+@export var fuel_pickup_weight: float = 2.0
+@export var ammo_pickup_weight: float = 1.0
 
 @export_group("Spawn area")
 ## Spawn just past the right edge of the 960 px viewport.
@@ -126,22 +129,33 @@ func spawn_asteroid() -> Asteroid:
 	return asteroid
 
 
-## Spawn a random pickup (health, fuel or ammo, equally likely) at a free height.
+## Spawn a random pickup (health / fuel / ammo by their weights) at a free height.
 ## Returns null if no pickup scenes are assigned, or if no fair spot was found.
 func spawn_powerup() -> PowerUp:
 	var choices: Array[PackedScene] = []
-	if health_booster_scene != null:
-		choices.append(health_booster_scene)
-	if thruster_booster_scene != null:
-		choices.append(thruster_booster_scene)
-	if bullet_pickup_scene != null:
-		choices.append(bullet_pickup_scene)
+	var weights: Array[float] = []
+	for entry in [[health_booster_scene, health_pickup_weight],
+			[thruster_booster_scene, fuel_pickup_weight],
+			[bullet_pickup_scene, ammo_pickup_weight]]:
+		if entry[0] != null and entry[1] > 0.0:
+			choices.append(entry[0])
+			weights.append(entry[1])
 	if choices.is_empty():
 		return null
 	var y := _find_free_spawn_y(powerup_clearance_radius, spawn_y_min, spawn_y_max)
 	if is_nan(y):
 		return null
-	var powerup := choices.pick_random().instantiate() as PowerUp
+	var total_weight: float = 0.0
+	for w in weights:
+		total_weight += w
+	var roll: float = randf() * total_weight
+	var picked := choices.size() - 1
+	for i in choices.size():
+		roll -= weights[i]
+		if roll < 0.0:
+			picked = i
+			break
+	var powerup := choices[picked].instantiate() as PowerUp
 	powerup.position = Vector2(spawn_x, y)
 	add_child(powerup)
 	active_powerups.append(powerup)
