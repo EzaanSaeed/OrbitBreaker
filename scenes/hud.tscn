@@ -1,0 +1,228 @@
+[gd_scene format=3 uid="uid://cxbubvv5jamg"]
+
+[ext_resource type="Script" uid="uid://dy3c3d6egej31" path="res://scripts/hud.gd" id="1_hud"]
+
+[sub_resource type="StyleBoxFlat" id="BarBackground"]
+bg_color = Color(0.035, 0.08, 0.12, 0.96)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.12, 0.3, 0.36, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="BarFill"]
+bg_color = Color(0.15, 0.87, 0.95, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="Card"]
+bg_color = Color(0.025, 0.055, 0.09, 0.99)
+border_width_left = 1
+border_width_top = 2
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.15, 0.75, 0.85, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="ButtonNormal"]
+bg_color = Color(0.045, 0.18, 0.23, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.15, 0.75, 0.85, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="ButtonHover"]
+bg_color = Color(0.08, 0.31, 0.37, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.4, 0.95, 1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="ButtonFocus"]
+bg_color = Color(0, 0, 0, 0)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.75, 1, 1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="HUD" type="CanvasLayer" unique_id=585411686]
+layer = 10
+script = ExtResource("1_hud")
+
+[node name="Layout" type="Control" parent="." unique_id=677774237]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="TopMargin" type="MarginContainer" parent="Layout" unique_id=715360454]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 132.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 12
+
+[node name="TopRow" type="HBoxContainer" parent="Layout/TopMargin" unique_id=326441130]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 24
+
+[node name="Health" type="VBoxContainer" parent="Layout/TopMargin/TopRow" unique_id=412761113]
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 5
+
+[node name="Caption" type="Label" parent="Layout/TopMargin/TopRow/Health" unique_id=691102524]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.38, 0.8, 0.88, 1)
+theme_override_font_sizes/font_size = 13
+text = "HULL INTEGRITY"
+
+[node name="HealthBar" type="ProgressBar" parent="Layout/TopMargin/TopRow/Health" unique_id=1268607257]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/background = SubResource("BarBackground")
+theme_override_styles/fill = SubResource("BarFill")
+max_value = 1.0
+show_percentage = false
+
+[node name="HealthValue" type="Label" parent="Layout/TopMargin/TopRow/Health" unique_id=1984829112]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.96, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "-- / --"
+
+[node name="Spacer" type="Control" parent="Layout/TopMargin/TopRow" unique_id=1076357721]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="Score" type="VBoxContainer" parent="Layout/TopMargin/TopRow" unique_id=892356239]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 2
+
+[node name="Caption" type="Label" parent="Layout/TopMargin/TopRow/Score" unique_id=2137505380]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.38, 0.8, 0.88, 1)
+theme_override_font_sizes/font_size = 13
+text = "DISTANCE"
+horizontal_alignment = 2
+
+[node name="ScoreValue" type="Label" parent="Layout/TopMargin/TopRow/Score" unique_id=816957168]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.88, 0.98, 1, 1)
+theme_override_font_sizes/font_size = 28
+text = "0 m"
+horizontal_alignment = 2
+
+[node name="GameOverPanel" type="Control" parent="Layout" unique_id=1024225056]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Shade" type="ColorRect" parent="Layout/GameOverPanel" unique_id=620583220]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.005, 0.012, 0.03, 0.86)
+
+[node name="Center" type="CenterContainer" parent="Layout/GameOverPanel" unique_id=816721769]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Card" type="PanelContainer" parent="Layout/GameOverPanel/Center" unique_id=975843519]
+custom_minimum_size = Vector2(420, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("Card")
+
+[node name="Padding" type="MarginContainer" parent="Layout/GameOverPanel/Center/Card" unique_id=349589756]
+layout_mode = 2
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 28
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_bottom = 28
+
+[node name="Content" type="VBoxContainer" parent="Layout/GameOverPanel/Center/Card/Padding" unique_id=1181242896]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="Layout/GameOverPanel/Center/Card/Padding/Content" unique_id=885597488]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.98, 1, 1)
+theme_override_font_sizes/font_size = 30
+text = "SIGNAL LOST"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="Layout/GameOverPanel/Center/Card/Padding/Content" unique_id=1388822090]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.38, 0.8, 0.88, 1)
+theme_override_font_sizes/font_size = 13
+text = "FINAL DISTANCE"
+horizontal_alignment = 1
+
+[node name="FinalScore" type="Label" parent="Layout/GameOverPanel/Center/Card/Padding/Content" unique_id=528703514]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.25, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 36
+text = "0 m"
+horizontal_alignment = 1
+
+[node name="RestartButton" type="Button" parent="Layout/GameOverPanel/Center/Card/Padding/Content" unique_id=1693941737]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.9, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("ButtonNormal")
+theme_override_styles/pressed = SubResource("ButtonHover")
+theme_override_styles/hover = SubResource("ButtonHover")
+theme_override_styles/focus = SubResource("ButtonFocus")
+text = "RESTART"
