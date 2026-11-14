@@ -15,8 +15,10 @@ extends Node
 signal fuel_changed(current: float, maximum: float)
 
 @export var max_fuel: float = 100.0
-## PROVISIONAL tuning: fuel used per second of continuous thrust.
-## 5.0 means a full tank lasts 20 seconds of holding W or S.
+## Fuel used per second of thrust: a full tank is 20 s of holding W or S.
+## Tuned by autopilot playtests (player thrusting ~27% of the time): fuel stays
+## comfortable for ~2 minutes and first runs dry around 110-150 s, once the game
+## is at top speed. 6/s ran dry by ~60 s (too harsh); 3/s never mattered.
 @export var drain_per_second: float = 5.0
 
 var fuel: float = 0.0
