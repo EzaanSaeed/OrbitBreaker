@@ -17,7 +17,7 @@ signal restart_requested
 @onready var _score_value: Label       = $Layout/TopMargin/TopRows/Row1/Score/ScoreValue
 @onready var _ammo_value: Label        = $Layout/TopMargin/TopRows/Row2/Ammo/AmmoValue
 @onready var _fuel_bar: ProgressBar    = $Layout/TopMargin/TopRows/Row2/Fuel/FuelBar
-@onready var _fuel_value: Label        = $Layout/TopMargin/TopRows/Row2/Fuel/FuelValue
+@onready var _fuel_value: Label        = $Layout/TopMargin/TopRows/Row2/Fuel/FuelRow/FuelValue
 
 # ── Game-over references ─────────────────────────────────────────────────────
 @onready var _game_over: Control = $Layout/GameOverPanel
@@ -97,6 +97,8 @@ func _process(delta: float) -> void:
 	_restart_lockout = maxf(0.0, _restart_lockout - delta)
 	if _restart_lockout == 0.0:
 		_restart.disabled = false
+		# Focus it so Enter/Space restart from the keyboard once the lockout ends.
+		_restart.grab_focus()
 		set_process(false)
 
 
