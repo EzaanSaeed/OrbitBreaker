@@ -53,6 +53,7 @@ Everything needed to publish the web build. Upload steps first, then copy to pas
 > - Developer A: world, planets, asteroids, spawning, difficulty, integration, web build
 > - Developer B: ship, physics, health, collisions, boosters, HUD
 >
+> Art: meteors and effects from [Space Shooter Remastered](https://kenney.nl/assets/space-shooter-remastered) by Kenney (CC0).
 > Font: [Orbitron](https://github.com/theleagueof/orbitron) by The Orbitron Project Authors (SIL Open Font License 1.1).
 >
 > Source: https://github.com/EzaanSaeed/OrbitBreaker

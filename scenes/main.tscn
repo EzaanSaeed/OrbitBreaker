@@ -10,6 +10,7 @@
 [ext_resource type="Script" path="res://scripts/starfield.gd" id="9_stars"]
 [ext_resource type="PackedScene" path="res://scenes/bullet_pickup.tscn" id="10_ammo"]
 [ext_resource type="Script" path="res://scripts/tuning_presets.gd" id="11_tuning"]
+[ext_resource type="Script" path="res://scripts/thruster_flame.gd" id="12_flame"]
 
 [node name="Main" type="Node2D" unique_id=1538353141 node_paths=PackedStringArray("world", "player", "hud", "background")]
 script = ExtResource("1_tbgi4")
@@ -32,6 +33,9 @@ bullet_pickup_scene = ExtResource("10_ammo")
 position = Vector2(180, 270)
 thrust_power = 750.0
 max_vertical_speed = 320.0
+
+[node name="ThrusterFlame" type="Node2D" parent="Player" unique_id=1730004520]
+script = ExtResource("12_flame")
 
 [node name="HUD" parent="." unique_id=1203309656 instance=ExtResource("6_hud")]
 
