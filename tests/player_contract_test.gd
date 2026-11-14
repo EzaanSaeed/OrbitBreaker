@@ -96,9 +96,12 @@ func _run() -> void:
 	var heal = load("res://scripts/health_booster.gd").new()
 	heal.apply_effect(player)
 	heal.free()
+	# ThrusterBooster now refills fuel (+50, capped) instead of a 1.5x thrust boost.
+	player.fuel.refill(player.fuel.max_fuel)      # earlier thrust used some fuel
+	player.fuel.drain(14.0)                       # 5/s for 14 s -> 30 fuel left
 	var boost = load("res://scripts/thruster_booster.gd").new()
 	boost.apply_effect(player)
-	assert(player.thrust_multiplier == 1.5)
+	assert(is_equal_approx(player.fuel.fuel, 80.0) and player.thrust_multiplier == 1.0)
 	boost.free()
 	print("PASS public contract methods, boost timer and typed power-up interoperability")
 

@@ -1,8 +1,8 @@
 extends SceneTree
 ## Godot --headless --path . --fixed-fps 60 --script res://tests/player_fuel_test.gd
 
-## Add -- --fuel-pickup-integration when Developer A's +50 fuel pickup hook is present.
-var fuel_pickup_integration := "--fuel-pickup-integration" in OS.get_cmdline_user_args()
+## ThrusterBooster now refills fuel (Developer A); pass --legacy-boost to test the old 1.5x boost.
+var fuel_pickup_integration := not ("--legacy-boost" in OS.get_cmdline_user_args())
 
 func _initialize() -> void:
 	create_timer(180.0).timeout.connect(func(): quit(1))
