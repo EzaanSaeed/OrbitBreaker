@@ -1,6 +1,6 @@
 # Orbit Breaker — Domain Model (V3, approved by Developer A)
 
-Source: *Orbit Breaker Domain Model V3* (Developer B). This file records what was approved, where each class lives, and what was added on top of V3. Developer B's scripts are still contracts; the State column says what actually works.
+Source: *Orbit Breaker Domain Model V3* (Developer B). This file records what was approved, where each class lives, and what was added on top of V3. The State column says what actually works.
 
 ## Approved by Developer A (V3 §9)
 
@@ -23,7 +23,7 @@ Still tunable: boost duration, scroll-speed curve, spawn probabilities, gravity/
 
 | Class | File | Extends | Owner | State |
 |---|---|---|---|---|
-| Spaceship | `scripts/player.gd` | Area2D | B | Contract; bodies TODO |
+| Spaceship | `scripts/player.gd` + `scenes/player.tscn` | Area2D | B | Done (PR #4, with tests in `tests/`); collisions not yet handled |
 | Planet | `scripts/planet.gd` + `scenes/planet.tscn` | Area2D | A | Done (drawn in editor too) |
 | Asteroid | `scripts/asteroid.gd` + `scenes/asteroid.tscn` | Area2D | A | Done (random size, spins) |
 | PowerUp | `scripts/power_up.gd` | Area2D | **TBD** | Domain rules done |
@@ -62,7 +62,7 @@ These were needed to make V3 implementable. None changes gameplay.
 
 ## Main scene (temporary parts)
 
-`main.tscn` has a **placeholder `Player` node** (Spaceship script, radius-12 circle, cyan triangle) and a **`DebugLabel`** showing score, speed, planet count and gravity on the ship. When Developer B's `player.tscn` is merged, replace the placeholder with an instance of it and re-assign GameController's `player` export. Delete `DebugLabel` once the HUD exists.
+`Player` in `main.tscn` is now an instance of Developer B's `scenes/player.tscn` at (180, 270). The **`DebugLabel`** (score, speed, object counts, gravity on the ship) is temporary: delete it, and GameController's `debug_label` export, once the HUD exists.
 
 ## Spawning (World)
 
