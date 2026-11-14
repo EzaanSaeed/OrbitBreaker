@@ -10,6 +10,7 @@ extends CanvasLayer
 ## value (no score, ammo, fuel or health maths live here).
 
 signal restart_requested
+signal main_menu_requested
 
 # ── Top-bar references ───────────────────────────────────────────────────────
 @onready var _health_bar: ProgressBar  = $Layout/TopMargin/TopRows/Row1/Health/HealthBar
@@ -20,9 +21,10 @@ signal restart_requested
 @onready var _fuel_value: Label        = $Layout/TopMargin/TopRows/Row2/Fuel/FuelRow/FuelValue
 
 # ── Game-over references ─────────────────────────────────────────────────────
-@onready var _game_over: Control = $Layout/GameOverPanel
-@onready var _final_score: Label = $Layout/GameOverPanel/Center/Card/Padding/Content/FinalScore
-@onready var _restart: Button    = $Layout/GameOverPanel/Center/Card/Padding/Content/RestartButton
+@onready var _game_over: Control         = $Layout/GameOverPanel
+@onready var _final_score: Label         = $Layout/GameOverPanel/Center/Card/Padding/Content/FinalScore
+@onready var _restart: Button            = $Layout/GameOverPanel/Center/Card/Padding/Content/RestartButton
+@onready var _main_menu_button: Button   = $Layout/GameOverPanel/Center/Card/Padding/Content/MainMenuButton
 
 # ── Internal state ────────────────────────────────────────────────────────────
 var _health_tween: Tween
@@ -43,6 +45,7 @@ var _fuel_fill_low: StyleBoxFlat
 
 func _ready() -> void:
 	_restart.pressed.connect(func(): restart_requested.emit())
+	_main_menu_button.pressed.connect(_on_main_menu_pressed)
 	_game_over.hide()
 	set_process(false)
 	_build_dynamic_styles()
@@ -97,6 +100,7 @@ func _process(delta: float) -> void:
 	_restart_lockout = maxf(0.0, _restart_lockout - delta)
 	if _restart_lockout == 0.0:
 		_restart.disabled = false
+		_main_menu_button.disabled = false
 		set_process(false)
 
 
@@ -160,8 +164,15 @@ func show_game_over(score: int) -> void:
 	assert(score >= 0)
 	_final_score.text = "%d" % score
 	_game_over.show()
-	# Lock out the Restart button briefly so a Space press held at the moment
+	# Lock out the buttons briefly so a Space press held at the moment
 	# of death (Space is now the shoot key) cannot instantly skip the screen.
 	_restart.disabled = true
+	_main_menu_button.disabled = true
 	_restart_lockout = RESTART_LOCKOUT_DURATION
 	set_process(true)
+	_restart.grab_focus()
+
+
+func _on_main_menu_pressed() -> void:
+	main_menu_requested.emit()
+	get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")
