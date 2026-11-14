@@ -24,9 +24,10 @@ extends Node2D
 @export var asteroid_spawn_interval: float = 1.0
 ## Seconds between power-up spawn attempts (was 6 s before 2026-11-14 playtest).
 @export var powerup_spawn_interval: float = 4.0
-## Relative chance of each pickup type. Fuel pickups are twice as likely.
+## Relative chance of each pickup type. Equal (playtest 2026-11-14: fuel at 2x
+## felt like it was everywhere).
 @export var health_pickup_weight: float = 1.0
-@export var fuel_pickup_weight: float = 2.0
+@export var fuel_pickup_weight: float = 1.0
 @export var ammo_pickup_weight: float = 1.0
 
 @export_group("Spawn area")

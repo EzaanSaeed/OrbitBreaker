@@ -17,8 +17,8 @@ signal fuel_changed(current: float, maximum: float)
 @export var max_fuel: float = 100.0
 ## Fuel used per second of thrust: a full tank is ~33 s of holding W or S.
 ## Retuned 2026-11-14 for the stronger pull, ship drag and denser asteroids:
-## autopilot (thrusting ~32% of the time) first runs dry around 110-130 s, i.e.
-## late in a run. At the old 5/s it ran dry at ~65 s; 4/s at ~90-105 s.
+## autopilot (thrusting ~32% of the time, equal pickup weights) keeps fuel above
+## ~20% for 150 s runs; at the old 5/s it ran dry at ~65 s, 4/s at ~90-105 s.
 @export var drain_per_second: float = 3.0
 
 var fuel: float = 0.0

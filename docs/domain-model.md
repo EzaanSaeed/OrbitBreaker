@@ -108,8 +108,8 @@ Team is now three: **Developer C** owns `hud.gd`/`hud.tscn`, menus, VFX, sound a
 
 **Tuning (playtest-chosen 2026-11-14, rollback tag `tuning-baseline-2026-11-14`):**
 - Feel: planet pull 2 250 000 (×1.5 of the original), ship drag 2.0/s (set in GameController), thrust 750 and top speed 320 (set on the Player instance in `main.tscn`, so `player.gd` is unchanged).
-- Density: asteroids every 1.0 s (was 1.5), pickups every 4 s (was 6), weighted health 1 : fuel 2 : ammo 1.
-- Fuel: drain 3/s (was 5), ThrusterBooster +50. Autopilot thrusting ~32% of the time first runs dry around 110-130 s.
+- Density: asteroids every 1.0 s (was 1.5), pickups every 4 s (was 6), equally likely health / fuel / ammo (fuel at 2x felt like it was everywhere).
+- Fuel: drain 3/s (was 5), ThrusterBooster +50. Autopilot thrusting ~32% of the time: with equal pickup weights fuel never ran dry in 150 s runs (min 23%); deaths come from hazards, not fuel.
 - Debug-only keys 0-6 (`scripts/tuning_presets.gd`) switch between Baseline / Light / Medium / Strong / Heavy / Extreme / Chosen while playtesting; removed in release builds.
 - Tests pin `drain_per_second = 5` where they check fuel arithmetic, so retuning doesn't break them.
 
