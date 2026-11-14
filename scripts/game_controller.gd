@@ -155,13 +155,17 @@ func award_asteroid_bonus(asteroid: Node, score_bonus: int) -> void:
 		hud.update_score(get_display_score())
 
 
-## Hook up the weapon's kill events and the fuel display. Both are optional so
-## Main keeps working while Developer B's / Developer C's parts are in progress.
+## Hook up the weapon (kill bonuses, ammo display) and the fuel display.
+## The HUD parts switch on once Developer C's HUD has update_ammo/update_fuel,
+## and fuel once Developer B's Player has its ThrusterFuel node.
 func _connect_weapon_and_fuel() -> void:
 	if player == null:
 		return
-	if player.has_signal("asteroid_destroyed"):
-		player.connect("asteroid_destroyed", award_asteroid_bonus)
+	player.asteroid_destroyed.connect(award_asteroid_bonus)
+	if hud != null and hud.has_method("update_ammo"):
+		player.ammo_changed.connect(Callable(hud, "update_ammo"))
+		# The Player emitted its starting ammo before we connected; send it now.
+		hud.call("update_ammo", player.ammo)
 	var fuel := player.get("fuel") as ThrusterFuel
 	if fuel != null and hud != null and hud.has_method("update_fuel"):
 		fuel.fuel_changed.connect(Callable(hud, "update_fuel"))
