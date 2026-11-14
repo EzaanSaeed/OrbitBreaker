@@ -48,4 +48,4 @@ Currently in development for a 24-hour game jam.
 
 ## 👥 Team
 
-Developed by a team of two programmers.
+Developed by a team of three programmers. Ezaan, Fawaz and Danish.
