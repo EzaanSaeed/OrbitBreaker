@@ -81,3 +81,34 @@ Both booster scenes are assigned on World in `main.tscn`, so power-ups spawn (ra
 ## Web build
 
 `export_presets.cfg` has a **Web** preset (single-threaded, so itch.io needs no special headers). Godot 4.7.2 web export templates are required (Editor → Manage Export Templates). Build output goes to `build/` (git-ignored).
+
+## V4 — weapons, thruster fuel, combined score (agreed 2026-11-14)
+
+Team is now three: **Developer C** owns `hud.gd`/`hud.tscn`, menus, VFX, sound and music. Developer B owns the Player, weapon, bullets, ammo and BulletPickup. Developer A owns fuel rules, scoring, World spawning, `main.tscn` and the web export.
+
+| Decision | Outcome |
+|---|---|
+| Shooting | Hold Space; 15 starting bullets, one per shot, no cap; BulletPickup +15 |
+| Bullet hits asteroid | One hit destroys it; +10 score, at most once per asteroid; an asteroid that hit the ship never scores |
+| Bullet hits planet | Bullet disappears; no effect on the planet |
+| Bullet hits pickup | Ignored |
+| Score | One number labelled **Score** = distance points + asteroid bonuses. `distance_score` stays separate because difficulty is based on it |
+| Fuel | Starts at 100, drains only while thrusting; W+S together = no thrust, no drain; at 0 no controlled thrust, momentum and gravity continue |
+| ThrusterBooster | Refills fuel (replaces the old 1.5× boost) |
+
+**Interfaces**
+
+| Interface | Owner | Shape |
+|---|---|---|
+| Kill event | B emits, A receives | `Spaceship.asteroid_destroyed(asteroid, score_bonus)` → `GameController.award_asteroid_bonus(asteroid, score_bonus)` (guards: once per asteroid, only while RUNNING) |
+| Fuel | A (`scripts/thruster_fuel.gd`) | `ThrusterFuel` node, child of the Player as `fuel`: `fuel`, `max_fuel`, `drain_per_second`, `fuel_changed(current, maximum)`, `is_empty()`, `drain(delta)`, `refill(amount)` |
+| Fuel hook | B (`player.gd`) | Thrust term only: if direction ≠ 0 → empty ? direction = 0 : `fuel.drain(delta)` |
+| HUD | C | `update_score(int)`, `update_health(int, int)`, `update_ammo(int)`, `update_fuel(float, float)`, `show_game_over(int)`, `restart_requested`. GameController pushes all values; the HUD never reads the Player |
+| Pickups | A (World) | `bullet_pickup_scene` slot; pickups every 6 s, equally health / fuel / ammo |
+
+**Provisional tuning:** fuel drain 5/s (20 s of continuous thrust), ThrusterBooster +50 fuel, pickup every 6 s. Fire rate and bullet speed: Developer B.
+
+**Sequencing risks**
+- ThrusterBooster's refill change goes in **the same PR as Developer B's fuel hook**, together with updates to B's tests that still expect the 1.5× boost.
+- The old boost variables (`thrust_multiplier`, `boost_time_remaining`, `apply_thrust_boost`) are read by the HUD every frame. Developer C removes the boost countdown **before** (or in the same merge as) Developer B removes them.
+- Space is both shoot and the focused Restart button: Developer C makes Restart ignore input for ~0.5 s after game over, or uses Enter/R only.

@@ -8,6 +8,16 @@ extends Area2D
 
 signal player_died
 signal health_changed(current: int, maximum: int)
+signal ammo_changed(current: int)
+## Developer A can connect this to scoring; emitted only for projectile kills.
+signal asteroid_destroyed(asteroid: Asteroid, score_bonus: int)
+
+const STARTING_AMMO: int = 15
+@export var shot_interval: float = 0.2
+@export var bullet_scene: PackedScene = preload("res://scenes/bullet.tscn")
+var ammo: int = STARTING_AMMO
+var _shot_cooldown: float = 0.0
+var _is_firing: bool = false
 
 @export var thrust_power: float = 600.0
 @export var max_vertical_speed: float = 300.0
@@ -20,6 +30,7 @@ var vertical_velocity: float = 0.0
 
 var gravity_acceleration: float = 0.0
 var boost_time_remaining: float = 0.0
+var fuel: ThrusterFuel
 var _fixed_x: float
 var _standalone: bool = false
 var _thrust_direction: float = 0.0
@@ -34,6 +45,12 @@ var _ship_base_color: Color = Color.CYAN
 
 
 func _ready() -> void:
+	fuel = get_node_or_null("ThrusterFuel") as ThrusterFuel
+	# Also support script-only Player instances used by the public contract tests.
+	if fuel == null:
+		fuel = ThrusterFuel.new()
+		fuel.name = "ThrusterFuel"
+		add_child(fuel)
 	# Older local Main scenes also draw a child polygon over the scripted ship.
 	_ship_visual = get_node_or_null("Ship") as Polygon2D
 	if _ship_visual != null:
@@ -41,6 +58,8 @@ func _ready() -> void:
 	_assert_configuration()
 	_ensure_input_actions()
 	health = max_health
+	ammo = STARTING_AMMO
+	_shot_cooldown = 0.0
 	is_alive = true
 	_standalone = get_tree().current_scene == self
 	if _standalone:
@@ -50,6 +69,7 @@ func _ready() -> void:
 	if not area_entered.is_connected(_on_area_entered):
 		area_entered.connect(_on_area_entered)
 	health_changed.emit(health, max_health)
+	ammo_changed.emit(ammo)
 	set_process(false)
 	queue_redraw()
 
@@ -80,6 +100,64 @@ func _process(delta: float) -> void:
 func _physics_process(delta: float) -> void:
 	apply_thrust(Input.get_axis("thrust_up", "thrust_down"))
 	update_movement(delta)
+	_update_weapon(delta)
+
+
+func _update_weapon(delta: float) -> void:
+	_shot_cooldown = maxf(0.0, _shot_cooldown - delta)
+	# Avoid an extra physics tick from floating-point residue at 0.2 seconds.
+	if _shot_cooldown < 0.000001:
+		_shot_cooldown = 0.0
+	if Input.is_action_pressed("shoot"):
+		try_shoot()
+
+
+## Successful shots consume one round and emit ammo_changed once.
+## Bullets belong to the scene, independently of Player movement and death.
+func try_shoot() -> Bullet:
+	if not is_alive or ammo <= 0 or _shot_cooldown > 0.0 or _is_firing:
+		return null
+	if not is_inside_tree() or bullet_scene == null or not bullet_scene.can_instantiate():
+		return null
+	if not is_finite(shot_interval) or shot_interval <= 0.0:
+		return null
+	var parent := get_tree().current_scene
+	if parent == null or parent == self:
+		parent = get_parent()
+	if parent == null or parent.is_queued_for_deletion():
+		return null
+	_is_firing = true
+	var instance := bullet_scene.instantiate()
+	var bullet := instance as Bullet
+	if bullet == null:
+		instance.free()
+		_is_firing = false
+		return null
+	bullet.asteroid_destroyed.connect(_on_bullet_asteroid_destroyed)
+	parent.add_child(bullet)
+	if not is_instance_valid(bullet) or bullet.is_queued_for_deletion() or not bullet.is_inside_tree():
+		_is_firing = false
+		return null
+	var muzzle := get_node_or_null("Muzzle") as Node2D
+	bullet.global_position = muzzle.global_position if muzzle != null else global_position + Vector2(22.0, 0.0)
+	ammo -= 1
+	_shot_cooldown = shot_interval
+	ammo_changed.emit(ammo)
+	_is_firing = false
+	return bullet
+
+
+func _on_bullet_asteroid_destroyed(asteroid: Asteroid, score_bonus: int) -> void:
+	asteroid_destroyed.emit(asteroid, score_bonus)
+
+
+## Add ammunition without an arbitrary cap. Used by BulletPickup and future HUD.
+func restore_ammo(amount: int) -> void:
+	assert(amount >= 0, "Restored ammunition must be nonnegative.")
+	if not is_alive or amount <= 0:
+		return
+	ammo += amount
+	ammo_changed.emit(ammo)
 
 
 ## Set signed thrust for subsequent movement: -1 up, +1 down.
@@ -105,8 +183,17 @@ func update_movement(delta: float) -> void:
 		return
 
 	# Integrate only the boosted portion if the timer expires during this tick.
-	var boosted_delta: float = minf(delta, boost_time_remaining)
-	var thrust_delta: float = delta + (thrust_multiplier - 1.0) * boosted_delta
+	var powered_delta: float = 0.0
+	if _thrust_direction != 0.0 and not fuel.is_empty():
+		powered_delta = delta
+		if fuel.drain_per_second > 0.0:
+			powered_delta = minf(delta, fuel.fuel / fuel.drain_per_second)
+		fuel.drain(powered_delta)
+		if not is_alive:
+			gravity_acceleration = 0.0
+			return
+	var boosted_delta: float = minf(powered_delta, boost_time_remaining)
+	var thrust_delta: float = powered_delta + (thrust_multiplier - 1.0) * boosted_delta
 	vertical_velocity = clampf(
 		vertical_velocity + _thrust_direction * thrust_power * thrust_delta + gravity_acceleration * delta,
 		-max_vertical_speed, max_vertical_speed
@@ -132,6 +219,12 @@ func apply_gravity(acceleration: float) -> void:
 	if is_alive and is_finite(acceleration):
 		gravity_acceleration += acceleration
 		assert(is_finite(gravity_acceleration), "Accumulated gravity must be finite.")
+
+
+func restore_fuel(amount: float) -> void:
+	assert(is_finite(amount) and amount >= 0.0, "Fuel refill must be finite and nonnegative.")
+	if is_alive and is_finite(amount) and amount > 0.0:
+		fuel.refill(amount)
 
 
 func apply_thrust_boost(multiplier: float, duration: float) -> void:
@@ -196,6 +289,7 @@ func die() -> void:
 
 
 func _assert_configuration() -> void:
+	assert(is_finite(shot_interval) and shot_interval > 0.0, "Shot interval must be finite and positive.")
 	assert(max_health > 0, "Maximum health must be positive.")
 	assert(is_finite(max_vertical_speed) and max_vertical_speed > 0.0,
 		"Maximum vertical speed must be finite and positive.")
@@ -207,6 +301,7 @@ func _assert_configuration() -> void:
 
 
 func _assert_state() -> void:
+	assert(ammo >= 0, "Ammunition cannot be negative.")
 	assert(is_finite(boost_time_remaining) and boost_time_remaining >= 0.0,
 		"Boost time must be finite and nonnegative.")
 	assert(is_alive or (boost_time_remaining == 0.0 and thrust_multiplier == 1.0),
@@ -229,6 +324,7 @@ func _ensure_input_actions() -> void:
 	var defaults: Dictionary = {
 		"thrust_up": [KEY_W, KEY_UP],
 		"thrust_down": [KEY_S, KEY_DOWN],
+		"shoot": [KEY_SPACE],
 	}
 	for action: String in defaults:
 		if InputMap.has_action(action):
