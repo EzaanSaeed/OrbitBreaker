@@ -169,13 +169,6 @@ theme_override_styles/hover = SubResource("ButtonHover")
 theme_override_styles/focus = SubResource("ButtonFocus")
 text = "QUIT GAME"
 
-[node name="Footer" type="Label" parent="UI/Center/Card/Padding/Content"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.28, 0.52, 0.6, 1)
-theme_override_font_sizes/font_size = 14
-text = "GAME JAM 2026 • THEME: COSMOS"
-horizontal_alignment = 1
-
 [node name="ControlsOverlay" type="Control" parent="UI"]
 visible = false
 layout_mode = 1
@@ -301,7 +294,7 @@ text = "SUPPLY PODS"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.85, 0.96, 1, 1)
 theme_override_font_sizes/font_size = 14
-text = "Green: Hull (+25)  •  Orange: Fuel Pod"
+text = "Green: Hull (+25)  •  Orange: Fuel Pod  •  Blue: Ammo (+15 Bullets)"
 
 [node name="Hint" type="Label" parent="UI/ControlsOverlay/Center/Card/Padding/Content"]
 layout_mode = 2
