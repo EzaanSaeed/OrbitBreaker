@@ -2,6 +2,8 @@
 
 [ext_resource type="Script" uid="uid://dy3c3d6egej31" path="res://scripts/hud.gd" id="1_hud"]
 
+; ── Shared StyleBoxes ─────────────────────────────────────────────────────────
+
 [sub_resource type="StyleBoxFlat" id="BarBackground"]
 bg_color = Color(0.035, 0.08, 0.12, 0.96)
 border_width_left = 1
@@ -14,7 +16,7 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
-[sub_resource type="StyleBoxFlat" id="BarFill"]
+[sub_resource type="StyleBoxFlat" id="HealthBarFill"]
 bg_color = Color(0.15, 0.87, 0.95, 1)
 corner_radius_top_left = 3
 corner_radius_top_right = 3
@@ -69,6 +71,10 @@ corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 
+; ─────────────────────────────────────────────────────────────────────────────
+; Scene tree
+; ─────────────────────────────────────────────────────────────────────────────
+
 [node name="HUD" type="CanvasLayer" unique_id=585411686]
 layer = 10
 script = ExtResource("1_hud")
@@ -82,82 +88,158 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
+; ── Top HUD area ──────────────────────────────────────────────────────────────
+;
+;  Row 1:  HULL [bar] 100/100              SCORE  0
+;  Row 2:  AMMO 15                    FUEL [bar] 100%
+;
+; ─────────────────────────────────────────────────────────────────────────────
+
 [node name="TopMargin" type="MarginContainer" parent="Layout" unique_id=715360454]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_bottom = 132.0
+offset_bottom = 150.0
 grow_horizontal = 2
 mouse_filter = 2
 theme_override_constants/margin_left = 24
-theme_override_constants/margin_top = 40
+theme_override_constants/margin_top = 16
 theme_override_constants/margin_right = 24
 theme_override_constants/margin_bottom = 12
 
-[node name="TopRow" type="HBoxContainer" parent="Layout/TopMargin" unique_id=326441130]
+[node name="TopRows" type="VBoxContainer" parent="Layout/TopMargin"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
+
+; ── Row 1: Health (left)  |  Score (right) ───────────────────────────────────
+
+[node name="Row1" type="HBoxContainer" parent="Layout/TopMargin/TopRows"]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 24
 
-[node name="Health" type="VBoxContainer" parent="Layout/TopMargin/TopRow" unique_id=412761113]
+[node name="Health" type="VBoxContainer" parent="Layout/TopMargin/TopRows/Row1" unique_id=412761113]
 custom_minimum_size = Vector2(220, 0)
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 5
 
-[node name="Caption" type="Label" parent="Layout/TopMargin/TopRow/Health" unique_id=691102524]
+[node name="Caption" type="Label" parent="Layout/TopMargin/TopRows/Row1/Health" unique_id=691102524]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.38, 0.8, 0.88, 1)
 theme_override_font_sizes/font_size = 13
-text = "HULL INTEGRITY"
+text = "HULL"
 
-[node name="HealthBar" type="ProgressBar" parent="Layout/TopMargin/TopRow/Health" unique_id=1268607257]
+[node name="HealthBar" type="ProgressBar" parent="Layout/TopMargin/TopRows/Row1/Health" unique_id=1268607257]
 custom_minimum_size = Vector2(0, 12)
 layout_mode = 2
 mouse_filter = 2
 theme_override_styles/background = SubResource("BarBackground")
-theme_override_styles/fill = SubResource("BarFill")
-max_value = 1.0
+theme_override_styles/fill = SubResource("HealthBarFill")
+max_value = 100.0
+value = 100.0
 step = 0.0
 show_percentage = false
 
-[node name="HealthValue" type="Label" parent="Layout/TopMargin/TopRow/Health" unique_id=1984829112]
+[node name="HealthValue" type="Label" parent="Layout/TopMargin/TopRows/Row1/Health" unique_id=1984829112]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.85, 0.96, 1, 1)
 theme_override_font_sizes/font_size = 16
 text = "-- / --"
 
-[node name="BoostIndicator" type="Label" parent="Layout/TopMargin/TopRow/Health"]
-visible = false
-layout_mode = 2
-mouse_filter = 2
-theme_override_colors/font_color = Color(1, 0.75, 0.2, 1)
-theme_override_font_sizes/font_size = 14
-text = "THRUST x1.5  |  5.0 s"
-
-[node name="Spacer" type="Control" parent="Layout/TopMargin/TopRow" unique_id=1076357721]
+[node name="Spacer" type="Control" parent="Layout/TopMargin/TopRows/Row1" unique_id=1076357721]
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 2
 
-[node name="Score" type="VBoxContainer" parent="Layout/TopMargin/TopRow" unique_id=892356239]
+[node name="Score" type="VBoxContainer" parent="Layout/TopMargin/TopRows/Row1" unique_id=892356239]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 2
 
-[node name="Caption" type="Label" parent="Layout/TopMargin/TopRow/Score" unique_id=2137505380]
+[node name="Caption" type="Label" parent="Layout/TopMargin/TopRows/Row1/Score" unique_id=2137505380]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.38, 0.8, 0.88, 1)
 theme_override_font_sizes/font_size = 13
-text = "DISTANCE"
+text = "SCORE"
 horizontal_alignment = 2
 
-[node name="ScoreValue" type="Label" parent="Layout/TopMargin/TopRow/Score" unique_id=816957168]
+[node name="ScoreValue" type="Label" parent="Layout/TopMargin/TopRows/Row1/Score" unique_id=816957168]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.88, 0.98, 1, 1)
 theme_override_font_sizes/font_size = 28
-text = "0 m"
+text = "0"
 horizontal_alignment = 2
+
+; ── Row 2: Ammo (left)  |  Fuel (right) ──────────────────────────────────────
+
+[node name="Row2" type="HBoxContainer" parent="Layout/TopMargin/TopRows"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 24
+
+[node name="Ammo" type="HBoxContainer" parent="Layout/TopMargin/TopRows/Row2"]
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 8
+
+[node name="AmmoCaption" type="Label" parent="Layout/TopMargin/TopRows/Row2/Ammo"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.38, 0.8, 0.88, 1)
+theme_override_font_sizes/font_size = 13
+text = "AMMO"
+vertical_alignment = 1
+
+[node name="AmmoValue" type="Label" parent="Layout/TopMargin/TopRows/Row2/Ammo"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.96, 1, 1)
+theme_override_font_sizes/font_size = 18
+text = "15"
+vertical_alignment = 1
+
+[node name="Spacer2" type="Control" parent="Layout/TopMargin/TopRows/Row2"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="Fuel" type="VBoxContainer" parent="Layout/TopMargin/TopRows/Row2"]
+custom_minimum_size = Vector2(160, 0)
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="FuelRow" type="HBoxContainer" parent="Layout/TopMargin/TopRows/Row2/Fuel"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 8
+
+[node name="FuelCaption" type="Label" parent="Layout/TopMargin/TopRows/Row2/Fuel/FuelRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.38, 0.8, 0.88, 1)
+theme_override_font_sizes/font_size = 13
+text = "FUEL"
+
+[node name="FuelValue" type="Label" parent="Layout/TopMargin/TopRows/Row2/Fuel/FuelRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.96, 1, 1)
+theme_override_font_sizes/font_size = 13
+text = "100%"
+horizontal_alignment = 2
+
+[node name="FuelBar" type="ProgressBar" parent="Layout/TopMargin/TopRows/Row2/Fuel"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/background = SubResource("BarBackground")
+max_value = 100.0
+value = 100.0
+step = 0.0
+show_percentage = false
+
+; ── Game-over panel (hidden until show_game_over()) ───────────────────────────
 
 [node name="GameOverPanel" type="Control" parent="Layout" unique_id=1024225056]
 visible = false
@@ -214,14 +296,14 @@ horizontal_alignment = 1
 layout_mode = 2
 theme_override_colors/font_color = Color(0.38, 0.8, 0.88, 1)
 theme_override_font_sizes/font_size = 13
-text = "FINAL DISTANCE"
+text = "FINAL SCORE"
 horizontal_alignment = 1
 
 [node name="FinalScore" type="Label" parent="Layout/GameOverPanel/Center/Card/Padding/Content" unique_id=528703514]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.25, 0.9, 1, 1)
 theme_override_font_sizes/font_size = 36
-text = "0 m"
+text = "0"
 horizontal_alignment = 1
 
 [node name="RestartButton" type="Button" parent="Layout/GameOverPanel/Center/Card/Padding/Content" unique_id=1693941737]
