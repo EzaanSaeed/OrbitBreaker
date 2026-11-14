@@ -15,6 +15,10 @@ run/main_scene="res://scenes/MainMenu.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
 
+[autoload]
+
+AudioManager="*res://scripts/audio_manager.gd"
+
 [display]
 
 window/size/viewport_width=960
@@ -40,6 +44,10 @@ thrust_down={
 [physics]
 
 3d/physics_engine="Jolt Physics"
+
+[audio]
+
+default_bus_layout="res://audio/default_bus_layout.tres"
 
 [rendering]
 
