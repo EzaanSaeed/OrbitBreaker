@@ -68,15 +68,20 @@ func _ready() -> void:
 ## Advance the spawn timers and spawn whatever is due. Called by GameController
 ## each physics step while the run is active. (Not listed in V3: World owns
 ## spawning, so it also owns the timers.)
-func update_spawning(delta: float) -> void:
+## hazard_rate_scale (>= 1, from GameController's difficulty) makes planets and
+## asteroids come more often; power-ups keep their own rate.
+func update_spawning(delta: float, hazard_rate_scale: float = 1.0) -> void:
 	assert(delta >= 0.0)
+	assert(hazard_rate_scale >= 1.0)
+	var planet_interval := spawn_interval / hazard_rate_scale
+	var asteroid_interval := asteroid_spawn_interval / hazard_rate_scale
 	_planet_timer += delta
-	if _planet_timer >= spawn_interval:
-		_planet_timer -= spawn_interval
+	if _planet_timer >= planet_interval:
+		_planet_timer -= planet_interval
 		spawn_planet()
 	_asteroid_timer += delta
-	if _asteroid_timer >= asteroid_spawn_interval:
-		_asteroid_timer -= asteroid_spawn_interval
+	if _asteroid_timer >= asteroid_interval:
+		_asteroid_timer -= asteroid_interval
 		spawn_asteroid()
 	_powerup_timer += delta
 	if _powerup_timer >= powerup_spawn_interval:
