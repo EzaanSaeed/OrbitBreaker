@@ -7,21 +7,23 @@
 [ext_resource type="PackedScene" uid="uid://cxbubvv5jamg" path="res://scenes/hud.tscn" id="6_hud"]
 [ext_resource type="PackedScene" path="res://scenes/health_booster.tscn" id="7_hboost"]
 [ext_resource type="PackedScene" path="res://scenes/thruster_booster.tscn" id="8_tboost"]
+[ext_resource type="Script" path="res://scripts/starfield.gd" id="9_stars"]
 
-[node name="Main" type="Node2D" unique_id=1538353141 node_paths=PackedStringArray("world", "player", "hud")]
+[node name="Main" type="Node2D" unique_id=1538353141 node_paths=PackedStringArray("world", "player", "hud", "background")]
 script = ExtResource("1_tbgi4")
 world = NodePath("World")
 player = NodePath("Player")
 hud = NodePath("HUD")
+background = NodePath("Background")
+
+[node name="Background" type="Node2D" parent="." unique_id=1730004211]
+script = ExtResource("9_stars")
 
 [node name="World" type="Node2D" parent="." unique_id=2068908855]
 script = ExtResource("2_tefeu")
 planet_scene = ExtResource("3_o6xl0")
 health_booster_scene = ExtResource("7_hboost")
 thruster_booster_scene = ExtResource("8_tboost")
-
-[node name="TestPlanet" parent="World" unique_id=759353032 instance=ExtResource("3_o6xl0")]
-position = Vector2(620, 360)
 
 [node name="Player" parent="." unique_id=488482243 instance=ExtResource("5_85g3d")]
 position = Vector2(180, 270)

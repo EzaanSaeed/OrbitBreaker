@@ -64,10 +64,10 @@ These were needed to make V3 implementable. None changes gameplay.
 
 ```
 Main (GameController)
-├── World (World)      planet/asteroid/booster scenes assigned here
-│   └── TestPlanet
-├── Player             instance of scenes/player.tscn at (180, 270)
-└── HUD                instance of scenes/hud.tscn
+├── Background (Starfield)  3-layer parallax stars, visual only
+├── World (World)           planet/asteroid/booster scenes assigned here
+├── Player                  instance of scenes/player.tscn at (180, 270)
+└── HUD                     instance of scenes/hud.tscn
 ```
 
 The temporary `DebugLabel` has been removed now that the HUD exists.

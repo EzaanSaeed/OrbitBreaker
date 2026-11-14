@@ -17,6 +17,12 @@ enum GameState { RUNNING, GAME_OVER }
 ## Scroll speed gained per pixel travelled. Tunable. At 0.005 the speed goes
 ## from 180 to 350 over 34 000 px (about 2–3 minutes).
 @export var speed_gain_per_distance: float = 0.005
+## Once max_scroll_speed is reached, planets and asteroids spawn more often:
+## the spawn rate grows by this much per pixel travelled past that point.
+## At 0.00003 it doubles over the next ~33 000 px (about 1.5 minutes).
+@export var spawn_rate_gain_per_distance: float = 0.00003
+## Upper limit on that spawn-rate multiplier (2 = hazards twice as often).
+@export var max_spawn_rate_scale: float = 2.0
 ## Converts pixels travelled into the displayed score.
 @export var score_scale: float = 0.1
 ## The ship dies instantly if its centre leaves [play_area_top, play_area_bottom].
@@ -30,10 +36,14 @@ enum GameState { RUNNING, GAME_OVER }
 @export var world: World
 @export var player: Spaceship
 @export var hud: HUD
+## Optional parallax background; purely visual.
+@export var background: Starfield
 
 var game_state: GameState = GameState.RUNNING
 var distance_score: float = 0.0
 var scroll_speed: float = 0.0
+## 1.0 until top speed is reached, then rises towards max_spawn_rate_scale.
+var spawn_rate_scale: float = 1.0
 
 
 
@@ -55,9 +65,11 @@ func _physics_process(delta: float) -> void:
 	if game_state != GameState.RUNNING:
 		return
 	world.update_world(delta, scroll_speed)
+	if background != null:
+		background.scroll(scroll_speed * delta)
 	world.remove_offscreen_objects()
 	if spawning_enabled:
-		world.update_spawning(delta)
+		world.update_spawning(delta, spawn_rate_scale)
 	if player != null and player.is_alive:
 		player.apply_gravity(world.get_total_gravity_at(player.global_position))
 	update_score(delta)
@@ -76,11 +88,15 @@ func update_score(delta: float) -> void:
 
 
 ## Raise scroll speed with distance travelled, capped at max_scroll_speed.
+## After the cap, keep the pressure rising by spawning hazards more often.
 ## delta is kept for the V3 signature (and for a time-based curve, if preferred).
 func update_difficulty(_delta: float) -> void:
 	if game_state != GameState.RUNNING:
 		return
 	scroll_speed = minf(max_scroll_speed, initial_scroll_speed + distance_score * speed_gain_per_distance)
+	var distance_at_max_speed: float = (max_scroll_speed - initial_scroll_speed) / speed_gain_per_distance
+	var distance_past_max: float = maxf(0.0, distance_score - distance_at_max_speed)
+	spawn_rate_scale = minf(max_spawn_rate_scale, 1.0 + distance_past_max * spawn_rate_gain_per_distance)
 
 
 ## Instant death if the ship leaves the vertical play area.
@@ -122,3 +138,5 @@ func validate_state() -> void:
 	assert(scroll_speed > 0.0)
 	assert(initial_scroll_speed > 0.0 and initial_scroll_speed <= max_scroll_speed)
 	assert(play_area_top < play_area_bottom)
+	assert(speed_gain_per_distance > 0.0)
+	assert(spawn_rate_gain_per_distance >= 0.0 and max_spawn_rate_scale >= 1.0)
