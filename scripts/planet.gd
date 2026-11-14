@@ -24,6 +24,10 @@ extends Area2D
 		color = value
 		queue_redraw()
 
+## Multiplies every planet's pull. 1.0 in normal play; the debug-only tuning
+## presets (scripts/tuning_presets.gd) change it while playtesting.
+static var gravity_scale: float = 1.0
+
 @onready var _collision_shape: CollisionShape2D = $CollisionShape2D
 
 
@@ -47,9 +51,9 @@ func _draw() -> void:
 func get_gravity_at(ship_position: Vector2) -> float:
 	var offset: Vector2 = global_position - ship_position
 	var distance_squared: float = maxf(offset.length_squared(), min_distance_squared)
-	var gravity: float = offset.normalized().y * gravity_strength / distance_squared
-	assert(is_finite(gravity))
-	return gravity
+	var gravity_accel: float = offset.normalized().y * gravity_strength * gravity_scale / distance_squared
+	assert(is_finite(gravity_accel))
+	return gravity_accel
 
 
 ## Scroll with the world.

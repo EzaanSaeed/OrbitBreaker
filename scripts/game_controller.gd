@@ -47,6 +47,10 @@ var bonus_score: int = 0
 var scroll_speed: float = 0.0
 ## 1.0 until top speed is reached, then rises towards max_spawn_rate_scale.
 var spawn_rate_scale: float = 1.0
+## Drag on the ship's vertical movement, per second (0 = none: the ship keeps
+## drifting until thrust or gravity changes it). Set by the debug-only tuning
+## presets; applied here so Developer B's player.gd stays untouched.
+var ship_damping: float = 0.0
 
 ## Instance ids of asteroids that already earned a bonus this run (never twice).
 var _bonus_awarded: Dictionary = {}
@@ -77,7 +81,8 @@ func _physics_process(delta: float) -> void:
 	if spawning_enabled:
 		world.update_spawning(delta, spawn_rate_scale)
 	if player != null and player.is_alive:
-		player.apply_gravity(world.get_total_gravity_at(player.global_position))
+		var drag := -player.vertical_velocity * ship_damping
+		player.apply_gravity(world.get_total_gravity_at(player.global_position) + drag)
 	update_score(delta)
 	update_difficulty(delta)
 	check_boundaries()

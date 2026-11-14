@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" path="res://scenes/thruster_booster.tscn" id="8_tboost"]
 [ext_resource type="Script" path="res://scripts/starfield.gd" id="9_stars"]
 [ext_resource type="PackedScene" path="res://scenes/bullet_pickup.tscn" id="10_ammo"]
+[ext_resource type="Script" path="res://scripts/tuning_presets.gd" id="11_tuning"]
 
 [node name="Main" type="Node2D" unique_id=1538353141 node_paths=PackedStringArray("world", "player", "hud", "background")]
 script = ExtResource("1_tbgi4")
@@ -31,3 +32,6 @@ bullet_pickup_scene = ExtResource("10_ammo")
 position = Vector2(180, 270)
 
 [node name="HUD" parent="." unique_id=1203309656 instance=ExtResource("6_hud")]
+
+[node name="TuningPresets" type="Node" parent="." unique_id=1730004377]
+script = ExtResource("11_tuning")
