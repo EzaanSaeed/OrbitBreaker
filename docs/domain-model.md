@@ -23,15 +23,15 @@ Still tunable: boost duration, scroll-speed curve, spawn probabilities, gravity/
 
 | Class | File | Extends | Owner | State |
 |---|---|---|---|---|
-| Spaceship | `scripts/player.gd` + `scenes/player.tscn` | Area2D | B | Done (PR #4, with tests in `tests/`); collisions not yet handled |
+| Spaceship | `scripts/player.gd` + `scenes/player.tscn` | Area2D | B | Done (PRs #4, #6): movement, health, boosts, collisions; tests in `tests/` |
 | Planet | `scripts/planet.gd` + `scenes/planet.tscn` | Area2D | A | Done (drawn in editor too) |
 | Asteroid | `scripts/asteroid.gd` + `scenes/asteroid.tscn` | Area2D | A | Done (random size, spins) |
 | PowerUp | `scripts/power_up.gd` | Area2D | **TBD** | Domain rules done |
-| HealthBooster | `scripts/health_booster.gd` | PowerUp | B | Done (one-liner from V3) |
-| ThrusterBooster | `scripts/thruster_booster.gd` | PowerUp | B | Done (one-liner from V3) |
+| HealthBooster | `scripts/health_booster.gd` + `scenes/health_booster.tscn` | PowerUp | B | Done (PR #7) |
+| ThrusterBooster | `scripts/thruster_booster.gd` + `scenes/thruster_booster.tscn` | PowerUp | B | Done (PR #7) |
 | World | `scripts/world.gd` | Node2D | A | Done: scrolling, cleanup, gravity, spawning of all three types with fair spacing |
 | GameController | `scripts/game_controller.gd` | Node2D | A | Done; collisions still to be wired (see Still open) |
-| HUD | `scripts/hud.gd` | CanvasLayer | B | Contract; bodies TODO |
+| HUD | `scripts/hud.gd` + `scenes/hud.tscn` | CanvasLayer | B | Done (PR #7): score, health bar, game-over panel, Restart (Enter/Space once focused) |
 
 GameController is the root of `main.tscn` and World is its child, as V3 allows. The earlier `main.gd` name is replaced by `game_controller.gd`.
 
@@ -52,7 +52,7 @@ These were needed to make V3 implementable. None changes gameplay.
 
 ## Still open
 
-- **Collision dispatch owner.** Who detects overlaps and calls `die()` / `take_damage()` + `deactivate()` / `collect()`? Proposal: Spaceship's `area_entered` handler (Developer B), checking the type of the area it touched.
+- ~~Collision dispatch owner~~ — resolved: Spaceship's `area_entered` handler (Developer B, PR #6).
 - **PowerUp base file owner.**
 - **Input action names:** `thrust_up` (W/Up) and `thrust_down` (S/Down) are now in `project.godot`; Developer B to confirm.
 
@@ -60,15 +60,23 @@ These were needed to make V3 implementable. None changes gameplay.
 
 960×540 viewport, `scenes/main.tscn` as the startup scene, dark background colour, and the two input actions.
 
-## Main scene (temporary parts)
+## Main scene
 
-`Player` in `main.tscn` is now an instance of Developer B's `scenes/player.tscn` at (180, 270). The **`DebugLabel`** (score, speed, object counts, gravity on the ship) is temporary: delete it, and GameController's `debug_label` export, once the HUD exists.
+```
+Main (GameController)
+├── World (World)      planet/asteroid/booster scenes assigned here
+│   └── TestPlanet
+├── Player             instance of scenes/player.tscn at (180, 270)
+└── HUD                instance of scenes/hud.tscn
+```
+
+The temporary `DebugLabel` has been removed now that the HUD exists.
 
 ## Spawning (World)
 
 Planets every 3 s, asteroids every 1.5 s, power-ups every 8 s — all tunable in World's inspector. Every new object keeps at least `min_spawn_gap` (60 px) of free space from every existing one, so there is always room for the ship; if no clear height is found after 8 tries, that spawn is skipped. Asteroids use a taller band (y 20–520) than planets (y 90–450) so hugging an edge isn't safe.
 
-**Power-ups don't spawn yet** because `health_booster_scene` and `thruster_booster_scene` on World are empty. When Developer B's booster scenes exist, assign them on the World node in `main.tscn` (Developer A).
+Both booster scenes are assigned on World in `main.tscn`, so power-ups spawn (random 50/50).
 
 ## Web build
 

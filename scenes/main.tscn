@@ -4,16 +4,21 @@
 [ext_resource type="Script" uid="uid://h4qrra7j4a5u" path="res://scripts/world.gd" id="2_tefeu"]
 [ext_resource type="PackedScene" path="res://scenes/planet.tscn" id="3_o6xl0"]
 [ext_resource type="PackedScene" uid="uid://chwteiu1ea47r" path="res://scenes/player.tscn" id="5_85g3d"]
+[ext_resource type="PackedScene" uid="uid://cxbubvv5jamg" path="res://scenes/hud.tscn" id="6_hud"]
+[ext_resource type="PackedScene" path="res://scenes/health_booster.tscn" id="7_hboost"]
+[ext_resource type="PackedScene" path="res://scenes/thruster_booster.tscn" id="8_tboost"]
 
-[node name="Main" type="Node2D" unique_id=1538353141 node_paths=PackedStringArray("world", "player", "debug_label")]
+[node name="Main" type="Node2D" unique_id=1538353141 node_paths=PackedStringArray("world", "player", "hud")]
 script = ExtResource("1_tbgi4")
 world = NodePath("World")
 player = NodePath("Player")
-debug_label = NodePath("DebugLabel")
+hud = NodePath("HUD")
 
 [node name="World" type="Node2D" parent="." unique_id=2068908855]
 script = ExtResource("2_tefeu")
 planet_scene = ExtResource("3_o6xl0")
+health_booster_scene = ExtResource("7_hboost")
+thruster_booster_scene = ExtResource("8_tboost")
 
 [node name="TestPlanet" parent="World" unique_id=759353032 instance=ExtResource("3_o6xl0")]
 position = Vector2(620, 360)
@@ -21,8 +26,4 @@ position = Vector2(620, 360)
 [node name="Player" parent="." unique_id=488482243 instance=ExtResource("5_85g3d")]
 position = Vector2(180, 270)
 
-[node name="DebugLabel" type="Label" parent="." unique_id=1203309656]
-offset_left = 10.0
-offset_top = 10.0
-offset_right = 10.0
-offset_bottom = 10.0
+[node name="HUD" parent="." unique_id=1203309656 instance=ExtResource("6_hud")]
