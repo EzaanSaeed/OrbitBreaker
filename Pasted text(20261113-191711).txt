@@ -1,0 +1,2831 @@
+# ORBIT BREAKER
+## Complete Game Development Project Handoff
+
+**Project:** Orbit Breaker  
+**Game Jam Theme:** COSMOS  
+**Engine:** Godot 4  
+**Programming Language:** GDScript  
+**Primary Platform:** Desktop web browsers (HTML5/Web export)  
+**Planned Distribution:** itch.io  
+**Team Size:** 2 developers  
+**Development Context:** 24-hour game jam  
+**Repository:** https://github.com/EzaanSaeed/OrbitBreaker
+
+---
+
+# Important: How to Interpret This Document
+
+This document consolidates the established game concept, decisions, technical plans, project setup, GitHub history, and proposed development responsibilities.
+
+It is intended to provide a new AI assistant with enough context to support Developer B without requiring access to the original ChatGPT conversation.
+
+Every important item belongs to one of these categories:
+
+| Status | Meaning |
+|---|---|
+| **Finalized** | Explicitly agreed on or accepted as the current direction |
+| **Planned** | Part of the current intended implementation, but not yet completed |
+| **Proposed** | A recommendation that has not been formally approved |
+| **Not yet decided** | Requires a team decision |
+| **Not verified** | Discussed or reportedly completed, but not independently confirmed in project files |
+| **Superseded** | An earlier idea or arrangement replaced by a later decision |
+
+**Critical rule:** Design discussions, example scripts, and implementation instructions do not establish that a feature has been coded.
+
+The team initially discussed three developers. The current team has **two developers**, and the new responsibilities in this document reflect that change.
+
+---
+
+# PART 1 — GAME OVERVIEW
+
+## 1.1 Game Title
+
+**Orbit Breaker**
+
+The title was selected after exploring an earlier concept called *Cosmic Control*.
+
+Orbit Breaker is the current game and should be treated as the official project title.
+
+**Status: Finalized**
+
+## 1.2 Game Concept
+
+Orbit Breaker is a **2D side-scrolling endless space survival game** in which the player controls a spaceship flying through a procedurally continuing environment filled with planets and potentially other obstacles.
+
+The spaceship automatically progresses through space.
+
+The player does not directly control its forward movement. Instead, the player uses upward and downward thrusters to maintain a safe trajectory.
+
+The central gameplay mechanic is **planetary gravity**.
+
+As the spaceship approaches planets, their gravitational attraction pulls it toward them. The player must compensate for these forces while navigating the environment.
+
+The objective is to survive as long as possible and travel the greatest possible distance.
+
+As the game continues, movement speed increases, making survival more difficult.
+
+The intended experience combines the accessible controls of an endless runner with a space-themed physics challenge.
+
+### One-sentence pitch
+
+> Orbit Breaker is a 2D endless space runner where players use spaceship thrusters to fight planetary gravity, avoid collisions, and survive an increasingly dangerous journey through the cosmos.
+
+## 1.3 Genre
+
+**Primary genre:** Endless runner  
+**Secondary elements:** Arcade survival, physics-based navigation
+
+The game is not currently a puzzle game, a spaceship combat game, or an orbital simulation.
+
+### Inspiration
+
+The team explicitly referenced **Subway Surfers** as an example of endless-runner progression.
+
+However, Orbit Breaker differs from a lane-based runner:
+
+- The player navigates vertically rather than switching fixed lanes.
+- Planets influence movement through gravitational attraction.
+- Obstacles move relative to the spaceship as the environment scrolls.
+- Survival depends partly on managing momentum and gravity.
+
+The goal is a simple-to-understand game with a distinctive physics mechanic.
+
+## 1.4 Game Jam Theme
+
+**Theme: COSMOS**
+
+The game uses this theme through its setting and mechanics:
+
+- Outer-space environment
+- Spaceship protagonist
+- Planets
+- Gravitational forces
+- Space navigation
+- Potential asteroids and other celestial hazards
+
+The gravitational mechanic is intended to make the theme relevant to actual gameplay rather than merely providing a space-themed background.
+
+**Status: Finalized**
+
+## 1.5 Intended Platform and Audience
+
+The game is primarily intended for **desktop web browsers**.
+
+Players should be able to open an itch.io page and play without manually installing a desktop application.
+
+The project will be developed using Godot and exported to a browser-compatible build.
+
+### Platform decisions
+
+| Platform | Status |
+|---|---|
+| Desktop web browser | Primary target |
+| Windows desktop executable | Possible optional export |
+| macOS desktop application | Possible optional export |
+| Linux desktop executable | Possible optional export |
+| Mobile | Not a current priority |
+| Consoles | Not planned |
+
+The team selected Godot's **Compatibility renderer** because browser deployment was a major requirement.
+
+Browser functionality must ultimately be verified with an actual exported build.
+
+## 1.6 Intended Player Experience
+
+The game should initially feel manageable, then become increasingly challenging.
+
+A typical play session should involve:
+
+1. The spaceship begins flying forward automatically.
+2. The environment moves toward the player.
+3. A planet appears ahead.
+4. Its gravity begins influencing the spaceship.
+5. The player uses thrusters to maintain a safe trajectory.
+6. The player avoids the planet and continues traveling.
+7. The distance score increases.
+8. New planets appear and the game accelerates.
+9. Eventually, a collision or boundary violation ends the run.
+10. The player restarts to attempt a better score.
+
+The design prioritizes replayability through a straightforward survival loop.
+
+## 1.7 Camera and Movement Model
+
+The original implementation proposal uses a fixed horizontal player position.
+
+For a 960×540 game window, the spaceship begins approximately at:
+
+- X = 180
+- Y = 270
+
+The world scrolls from right to left.
+
+Planets spawn offscreen on the right, move left, and disappear after passing the player.
+
+The player's primary movement is vertical.
+
+This produces the appearance of forward travel without requiring the spaceship to physically move across a large world.
+
+**Status:** Planned MVP design.
+
+### Important physics distinction
+
+The proposed gravity implementation affects **vertical acceleration only**.
+
+This is an intentional simplification for an endless runner.
+
+It is not a full two-dimensional orbital simulation, even though the game uses concepts inspired by planetary gravity.
+
+Full orbital motion and gravitational slingshot mechanics were considered in an earlier version of the concept, but are not required for the current MVP.
+
+## 1.8 Player Controls
+
+The agreed intended controls are:
+
+| Input | Action |
+|---|---|
+| W | Thrust upward |
+| Up Arrow | Thrust upward |
+| S | Thrust downward |
+| Down Arrow | Thrust downward |
+
+The original GDScript example used Godot's built-in `ui_up` and `ui_down` input actions.
+
+The developers should confirm that W and S are mapped correctly in Godot's Input Map.
+
+Whether to use built-in actions or custom names such as `thrust_up` and `thrust_down` is not yet finalized.
+
+A restart button and keyboard restart action are also planned.
+
+The exact restart key is not finalized, although Godot's `ui_accept` action was used in an earlier example.
+
+## 1.9 Core Gameplay Mechanics
+
+### A. Automatic forward progression
+
+The environment moves left at a speed that represents the spaceship's forward progress.
+
+The spaceship remains near a fixed horizontal coordinate.
+
+### B. Vertical thruster control
+
+Pressing Up/W accelerates the spaceship upward.
+
+Pressing Down/S accelerates it downward.
+
+Movement is intended to involve acceleration and velocity rather than only instant position changes.
+
+### C. Planetary gravity
+
+Planets exert gravitational attraction on the spaceship.
+
+The closer the spaceship is to a planet, the greater the intended effect of gravity.
+
+A planet above the ship tends to pull it upward.
+
+A planet below the ship tends to pull it downward.
+
+The initial implementation simplifies gravity to a vertical acceleration value.
+
+### D. Momentum
+
+The spaceship maintains vertical velocity over time.
+
+Releasing the movement keys does not necessarily stop the ship immediately.
+
+Gravity and thrust both influence its resulting motion.
+
+### E. Planet collision
+
+If the spaceship collides with a planet, the run ends.
+
+### F. Screen boundaries
+
+If the spaceship leaves the permitted vertical play area, the run ends.
+
+### G. Endless procedural spawning
+
+Planets continue appearing ahead of the spaceship.
+
+The initial system uses randomized vertical positions and repeating spawn intervals.
+
+### H. Distance score
+
+The game tracks how far the spaceship has traveled.
+
+Score increases as the world scrolls.
+
+### I. Increasing difficulty
+
+The original plan increases world scrolling speed over time.
+
+The exact difficulty curve is subject to playtesting.
+
+### J. Restarting
+
+After game over, the player can begin a fresh run.
+
+These are the core mechanics needed before optional features are considered.
+
+## 1.10 Progression and Difficulty
+
+Orbit Breaker is intended to be an endless game rather than a series of traditional levels.
+
+There is no predetermined final level in the MVP.
+
+The current plan is to increase difficulty by raising the scrolling speed as distance increases.
+
+An earlier code example suggested:
+
+- Initial scrolling speed: 180 pixels/second
+- Maximum scrolling speed: 350 pixels/second
+- Speed increases based on accumulated distance
+
+These are **prototype tuning values**, not approved final balance parameters.
+
+Other possible methods of increasing difficulty include:
+
+- Shortening the delay between planets
+- Increasing gravitational strength
+- Changing planet sizes
+- Introducing more complex obstacle patterns
+- Adding asteroids
+
+Those additions have not been finalized.
+
+## 1.11 Win and Loss Conditions
+
+### Winning
+
+There is no traditional win condition in the current endless-runner design.
+
+The objective is to survive and achieve a high distance score.
+
+### Losing
+
+The run ends when:
+
+- The spaceship collides with a planet.
+- The spaceship exits the vertical play area.
+
+Collision with other hazards would also end the run if those hazards are eventually implemented.
+
+### High scores
+
+Beating a previous high score has been described as part of the intended replay experience.
+
+However, persistent high-score saving has not been designed or implemented.
+
+Whether scores persist across browser sessions is **not yet decided**.
+
+## 1.12 Obstacles and Environmental Features
+
+| Feature | Status | Description |
+|---|---|---|
+| Planets | Planned MVP | Gravity sources and collision hazards |
+| Space background | Planned visual feature | Establishes the cosmos setting |
+| Asteroids | Optional | Additional hazards |
+| Different planet types | Not yet decided | Visual and/or gameplay variations |
+| Moving obstacles | Not yet decided | Potential challenge variation |
+| Black holes | Not yet decided | No approved implementation |
+| Wormhole goal | Superseded concept | Belonged to the earlier puzzle-game idea |
+| Fuel management | Optional idea only | Not part of the current MVP |
+| Near-miss bonuses | Optional idea only | Potential scoring extension |
+| Realistic orbital slingshots | Optional idea only | Requires more complex physics |
+
+Do not implement optional features as if they were confirmed requirements.
+
+## 1.13 Art Style and Visual Direction
+
+No final art style has been approved.
+
+The initial prototype was intentionally designed to work without external sprites.
+
+Earlier suggested placeholder visuals included:
+
+- Cyan triangular spaceship
+- Purple circular planets
+- Dark space background
+- Small stars
+- Optional thruster particles
+- Simple game-over interface
+
+These are implementation-friendly placeholders.
+
+Possible improvements include:
+
+- Animated engine flames
+- Particle trails
+- Parallax starfields
+- Planet textures
+- Collision effects
+- Camera shake
+- Screen transitions
+
+All improvements beyond basic clarity should be evaluated against available development time.
+
+## 1.14 Sound Design
+
+The project is expected to benefit from simple arcade sound effects.
+
+Potential sounds include:
+
+- Thruster activation
+- Collision
+- Game over
+- Restart
+- Background space ambience or music
+
+No specific audio assets, soundtrack, composers, or sound libraries have been selected.
+
+**Status: Proposed**
+
+## 1.15 Evolution of the Concept
+
+The game went through several conceptual stages.
+
+### Concept 1: Cosmic Control
+
+The original idea involved directing spaceship traffic.
+
+This concept was not selected.
+
+**Status: Superseded**
+
+### Concept 2: Orbit Breaker as a puzzle game
+
+The next idea involved guiding a fuel-less spaceship using planetary gravity to reach a wormhole.
+
+This design emphasized gravitational navigation and potentially orbital slingshots.
+
+It was subsequently replaced.
+
+**Status: Superseded**
+
+### Concept 3: Orbit Breaker as an endless runner
+
+The team decided to make an endless runner inspired by Subway Surfers, but with a gravity mechanic.
+
+This is the current accepted design.
+
+**Status: Finalized**
+
+The earlier puzzle and traffic-control concepts should not be silently reintroduced.
+
+---
+
+# PART 2 — COMPREHENSIVE DECISION LOG
+
+## 2.1 Game Design Decisions
+
+| Decision | Rationale | Status |
+|---|---|---|
+| Name the game Orbit Breaker | Selected during concept development | Finalized |
+| Use COSMOS as the theme | Game jam requirement | Finalized |
+| Make a 2D game | Smaller scope and easier implementation | Finalized |
+| Use an endless-runner format | Selected over puzzle-based gravity navigation | Finalized |
+| Spaceship is the playable character | Core game concept | Finalized |
+| Player controls vertical thrust | Central input mechanic | Finalized |
+| Gravity affects the spaceship | Distinguishing gameplay feature | Finalized |
+| Planets are obstacles | Required for gravity-based survival | Planned MVP |
+| Endless planet spawning | Supports repeated survival gameplay | Planned MVP |
+| Distance-based score | Measures survival/progression | Planned MVP |
+| Increasing speed | Creates escalating difficulty | Planned MVP |
+| Collision-based game over | Defines failure | Planned MVP |
+| Boundary-based game over | Prevents escaping the gameplay challenge | Planned MVP |
+| Restart after death | Supports repeat play | Planned MVP |
+| Add asteroids | Additional obstacle variety | Optional |
+| Add realistic slingshots | More advanced physics | Optional |
+| Add fuel | Additional resource-management system | Optional |
+| Add near-miss bonuses | More advanced scoring | Optional |
+
+## 2.2 Technology Decisions
+
+| Decision | Rationale | Status |
+|---|---|---|
+| Use Godot 4 | Team wanted to learn a real game engine | Finalized |
+| Use GDScript | Native Godot scripting, quick to learn | Finalized |
+| Avoid TypeScript for core gameplay | Browser export does not require TypeScript | Finalized |
+| Use 2D scenes/nodes | Appropriate to the gameplay | Finalized |
+| Target browsers | Easy sharing and judging | Finalized |
+| Target itch.io | Intended game jam publishing platform | Planned |
+| Use Compatibility renderer | Browser compatibility | Selected at project creation |
+| Use 960×540 viewport | Proposed 16:9 game resolution | Proposed; verify settings |
+| Use GitHub | Collaboration and version control | Finalized |
+| Use feature branches | Reduces conflicts during parallel development | Recommended workflow |
+| Use scene-based architecture | Matches Godot's programming model | Recommended |
+| Avoid N-tier architecture | No separate backend/database needed | Recommended |
+| Use lightweight MVC separation | Helps organize gameplay and UI responsibilities | Recommended |
+
+## 2.3 Programming and Editor Decisions
+
+The team discussed multiple development tools.
+
+### Godot editor
+
+Godot itself remains the authoritative environment for:
+
+- Scene creation
+- Node configuration
+- Input Map
+- Physics configuration
+- Game execution
+- Debugging
+- Exporting
+
+### VS Code
+
+Discussed as a convenient external editor for GDScript.
+
+No requirement that all developers use VS Code.
+
+### WebStorm
+
+One teammate expressed interest in using JetBrains WebStorm.
+
+WebStorm can be used as an external code editor, potentially with a compatible GDScript plugin.
+
+It does not replace Godot for scene authoring and runtime testing.
+
+### JetBrains Rider
+
+Discussed as an alternative JetBrains IDE with stronger Godot-oriented support.
+
+No decision to switch to Rider was recorded.
+
+### Claude Code
+
+Discussed as an AI coding assistant that can work on the project files.
+
+Not confirmed installed or actively used.
+
+### ChatGPT/Codex
+
+Discussed as a way to receive AI assistance with project code.
+
+Using Codex alongside Godot was recommended.
+
+Not confirmed installed or connected.
+
+### ChatGPT within Godot
+
+Community-made integrations were discussed.
+
+No specific plugin was confirmed installed.
+
+**Important:** None of these optional AI tools should become a technical dependency of the game.
+
+## 2.4 Software Architecture Decision
+
+The team compared **MVC** and **N-tier**.
+
+The recommendation was to use:
+
+**Scene-based, component-oriented Godot architecture with lightweight separation of concerns inspired by MVC.**
+
+Reasoning:
+
+- Godot already organizes games around scenes and nodes.
+- The game does not need a traditional multi-tier application backend.
+- Strict MVC would introduce unnecessary boilerplate.
+- Independent scene ownership helps collaborative development.
+- Two developers can build separate systems and integrate them later.
+
+This is the currently recommended architecture, but the exact class design remains open pending Developer B's domain model.
+
+## 2.5 Team Size Decision
+
+Earlier planning assumed **three programmers**.
+
+Those roles were:
+
+1. Spaceship and gravity physics
+2. Main scene, planets, spawning, scoring, game integration
+3. HUD, graphics, sounds, visual polish
+
+The team now consists of **two developers**.
+
+The old three-person allocation is superseded.
+
+The new allocation in Part 4 is a **proposal** until both developers accept it.
+
+## 2.6 Decisions Still Open
+
+The following have not been finalized:
+
+- Exact gravity strength and thrust power
+- Gravity calculation architecture
+- Final collision-handling method
+- Exact planet spawning algorithm
+- Planet sizes and variety
+- Final difficulty curve
+- Final asset style
+- Audio sources and music
+- High-score persistence
+- Input action naming convention
+- Use of reusable Godot `Resource` configurations
+- Exact game state controller design
+- Domain model class relationships
+- Browser-specific export settings
+- Optional hazards and bonus features
+- Final responsibility split between the two developers
+
+These questions should be resolved incrementally, not all at once.
+
+---
+
+# PART 3 — CURRENT DEVELOPMENT STATUS
+
+## 3.1 Actual Progress Summary
+
+The project has moved beyond conceptual planning into initial project and repository setup.
+
+However, there is **no verified evidence of a playable game prototype yet**.
+
+The initial Godot project exists.
+
+Git was initialized.
+
+A README was created.
+
+The Godot files were committed.
+
+The GitHub histories were integrated after resolving a merge conflict, and Developer A reported completing the push.
+
+No completed gameplay scenes or scripts were demonstrated in the conversation.
+
+## 3.2 Godot Project Setup
+
+The project was created in Godot on macOS.
+
+The local directory is:
+
+```text
+~/Documents/Projects/orbit-breaker
+```
+
+The Godot project was created with the name **Orbit Breaker**.
+
+The Compatibility renderer was selected.
+
+The Godot editor was open and working.
+
+A prior screenshot was described as showing Godot 4.7.2. The team should verify the exact version currently installed on both machines rather than assume all installations match.
+
+### Initial files observed
+
+The first terminal listing showed:
+
+```text
+icon.svg
+icon.svg.import
+project.godot
+```
+
+The project had not initially been configured as a Git repository, despite Git being selected in Godot's new-project settings.
+
+That issue was resolved using `git init`.
+
+## 3.3 Git Repository Setup
+
+The shared repository is:
+
+https://github.com/EzaanSaeed/OrbitBreaker
+
+This repository was created by the collaborating developer.
+
+Developer A initialized Git inside the existing local Godot project.
+
+### Git history relevant to setup
+
+Developer A executed:
+
+```bash
+git init
+git remote add origin https://github.com/EzaanSaeed/OrbitBreaker.git
+touch README.md
+open -e README.md
+git add .
+git commit -m "initial commit"
+git branch -M main
+```
+
+The local initial commit had identifier:
+
+```text
+c664550
+```
+
+The commit reported seven files:
+
+```text
+.editorconfig
+.gitattributes
+.gitignore
+README.md
+icon.svg
+icon.svg.import
+project.godot
+```
+
+### First push problem
+
+The initial push was rejected:
+
+```text
+main -> main (fetch first)
+```
+
+This was because the remote repository already had commits.
+
+### First pull problem
+
+A simple `git pull` did not complete because the local branch had no configured tracking branch.
+
+### Successful fetch and merge attempt
+
+Developer A ran:
+
+```bash
+git pull origin main --allow-unrelated-histories --no-rebase
+```
+
+Git then detected:
+
+```text
+CONFLICT (add/add): Merge conflict in README.md
+```
+
+Both local and remote repositories had independently created README files.
+
+### Conflict resolution
+
+The recommended solution was:
+
+```bash
+git checkout --ours README.md
+git add README.md
+git commit -m "Merge GitHub repository with Godot project"
+git push -u origin main
+```
+
+Developer A subsequently reported the setup complete.
+
+**Current status:** GitHub integration has reportedly been completed. The latest commit and final remote file listing were not separately displayed in the conversation.
+
+Before further collaborative development, both developers should run `git status` and verify the repository contents.
+
+### Important consequence
+
+Because the original README was drafted when there were three developers, its team description may need updating to two developers.
+
+Its exact current contents are not available in the conversation.
+
+## 3.4 Folder Structure
+
+A recommended project structure was discussed:
+
+```text
+orbit-breaker/
+├── project.godot
+├── .gitignore
+├── README.md
+├── scenes/
+│   ├── main.tscn
+│   ├── player.tscn
+│   ├── planet.tscn
+│   └── hud.tscn
+├── scripts/
+│   ├── main.gd
+│   ├── player.gd
+│   ├── planet.gd
+│   └── hud.gd
+└── assets/
+    ├── sprites/
+    └── audio/
+```
+
+**Status: Proposed structure, not verified as created.**
+
+The conversation included instructions to create these folders and scenes, but no subsequent file listing confirmed they exist.
+
+Git does not track empty folders.
+
+The team should create the directories as needed rather than assuming they already exist.
+
+## 3.5 Features Already Implemented
+
+Based strictly on the available conversation:
+
+| Component | Status |
+|---|---|
+| Godot project initialization | Completed |
+| Default Godot icon/resources | Present initially |
+| Git initialization | Completed |
+| GitHub remote configuration | Completed |
+| Initial commit | Completed |
+| README creation | Completed |
+| Merge conflict resolution and push | Reported complete |
+| Main scene | Not verified |
+| Player scene | Not verified |
+| Player movement | Not verified |
+| Planet scene | Not verified |
+| Planetary gravity | Not verified |
+| Endless scrolling | Not verified |
+| Procedural spawning | Not verified |
+| Collision handling | Not verified |
+| Distance score | Not verified |
+| HUD | Not verified |
+| Game-over state | Not verified |
+| Restart system | Not verified |
+| Browser export | Not verified |
+
+Do not assume any gameplay functionality exists until the repository is inspected.
+
+## 3.6 Previous Prototype Code
+
+The original ChatGPT conversation provided example GDScript for:
+
+- `player.gd`
+- `planet.gd`
+- `main.gd`
+- `hud.gd`
+
+These scripts were suggested examples.
+
+They were **not confirmed to have been added to the actual repository**.
+
+The important logic and proposed interfaces are documented in Parts 5 and 6.
+
+## 3.7 Current Development Baseline
+
+The safest baseline for planning is:
+
+**Godot project initialized, repository connected, but gameplay implementation not yet verified.**
+
+The next milestone should establish the first playable movement-and-gravity prototype.
+
+---
+
+# PART 4 — TWO-PERSON DEVELOPMENT BREAKDOWN
+
+## 4.1 Important Assignment Note
+
+The following distribution is a **proposed revised responsibility split**.
+
+It consolidates the original three-person structure into two meaningful programming roles.
+
+It should be approved by both developers before substantial parallel implementation.
+
+The split is designed to minimize simultaneous edits to shared scenes.
+
+## 4.2 Responsibility Overview
+
+| System | Developer A — Project Owner | Developer B — Collaborator |
+|---|---|---|
+| Main game scene | Primary | Integration/testing |
+| World scrolling | Primary | Test |
+| Planet scenes | Primary | Integration/testing |
+| Planet spawning | Primary | Test |
+| Difficulty progression | Primary | Test |
+| Distance score logic | Primary | Display score |
+| Overall game state | Primary | Consume state/signals |
+| Player scene | Integration/testing | Primary |
+| Thruster movement | Test | Primary |
+| Player gravity response | Integrate planet gravity | Primary |
+| Player collision component | Integrate game-over handling | Primary |
+| HUD and menus | Integration | Primary |
+| Game-over presentation | Trigger state | Primary |
+| Graphics and effects | Assist | Primary |
+| Audio | Assist | Primary |
+| Domain model | Joint review | Initial designer |
+| GitHub integration | Joint | Joint |
+| Testing and debugging | Joint | Joint |
+| Web export/release | Primary | Validation/assistance |
+
+Both developers are responsible for real gameplay programming.
+
+Developer B is not merely assigned art or documentation.
+
+---
+
+## 4.3 Developer A — Project Owner
+
+### Primary responsibility
+
+Developer A owns the overall gameplay loop and the systems that generate and control the space environment.
+
+Developer A is also the primary integrator of the separately developed systems.
+
+### Assigned systems
+
+#### A1. Main scene
+
+Own:
+
+```text
+scenes/main.tscn
+scripts/main.gd
+```
+
+Responsibilities:
+
+- Define the top-level scene structure
+- Instantiate the player scene
+- Instantiate the HUD scene
+- Create world containers
+- Coordinate game state
+- Manage gameplay updates
+- Connect signals
+- Trigger game-over behavior
+
+#### A2. Planet system
+
+Own:
+
+```text
+scenes/planet.tscn
+scripts/planet.gd
+```
+
+Responsibilities:
+
+- Define a planet as a reusable scene
+- Configure its appearance
+- Configure collision geometry
+- Expose gravity-related properties
+- Provide a gravity calculation interface
+- Support varied spawn positions
+
+The planet gravity interface must be agreed with Developer B.
+
+#### A3. World scrolling
+
+Responsibilities:
+
+- Move planets from right to left
+- Maintain scrolling speed
+- Remove entities after they leave the screen
+- Prevent unbounded scene growth
+- Support continued gameplay
+
+#### A4. Spawning
+
+Responsibilities:
+
+- Create planets dynamically
+- Control spawn timing
+- Randomize positions within allowed ranges
+- Avoid immediately unfair or impossible obstacle configurations
+
+#### A5. Score and difficulty
+
+Responsibilities:
+
+- Track accumulated travel distance
+- Increase difficulty over time
+- Expose the score to the HUD
+- Ensure score stops increasing after game over
+
+#### A6. Game state integration
+
+Responsibilities:
+
+- Track whether a run is active or ended
+- Stop gameplay on death
+- Notify the HUD
+- Restart the run
+- Coordinate scene-level state
+
+### Dependencies on Developer B
+
+Developer A needs:
+
+- An instantiable player scene
+- A stable player script interface
+- Player death/collision signals or agreed collision API
+- An instantiable HUD scene
+- HUD methods or signals for score updates and game over
+
+### Acceptance criteria
+
+Developer A's work is complete when:
+
+- Main scene starts without errors
+- Planets spawn ahead of the player
+- Planets move left
+- Offscreen planets are removed
+- Planet gravity values are correctly passed to the player
+- Collisions reliably trigger game over
+- Distance increases during active gameplay
+- Difficulty increases in a controllable manner
+- Game-over state stops the run
+- Restart works after integration
+- No unbounded accumulation of planet instances occurs
+
+### Recommended development order
+
+1. Verify project and scene structure.
+2. Define integration contracts with Developer B.
+3. Create `main.tscn`.
+4. Create the planet scene and script.
+5. Add scrolling movement.
+6. Add planet spawning.
+7. Connect player gravity.
+8. Add collision/game-over integration.
+9. Add scoring and difficulty.
+10. Integrate HUD, effects, and release systems.
+
+---
+
+## 4.4 Developer B — Collaborating Developer
+
+### Primary responsibility
+
+Developer B owns the spaceship's gameplay behavior, player-specific physics, and the user-facing interface.
+
+Developer B is also independently creating the initial domain model, which must be reviewed before it becomes an implementation requirement.
+
+### Assigned systems
+
+#### B1. Player scene
+
+Own:
+
+```text
+scenes/player.tscn
+scripts/player.gd
+```
+
+Responsibilities:
+
+- Define the spaceship scene
+- Configure collision shape
+- Draw or display the ship
+- Handle upward and downward input
+- Implement acceleration and momentum
+- Support gravitational acceleration
+- Cap movement velocity when appropriate
+
+#### B2. Player physics
+
+Responsibilities:
+
+- Calculate thrust acceleration from input
+- Maintain vertical velocity
+- Receive gravity contributions
+- Update vertical position
+- Support gameplay tuning
+
+Developer B should not hardcode planet spawning or world scrolling inside the player script.
+
+#### B3. Player collision behavior
+
+Responsibilities:
+
+- Ensure player collision shape accurately represents the ship
+- Support reliable collision detection
+- Emit a signal or notify the game controller when the player dies
+- Prevent duplicate death events
+
+The exact collision ownership must be agreed before implementation.
+
+#### B4. HUD and game-over UI
+
+Own:
+
+```text
+scenes/hud.tscn
+scripts/hud.gd
+```
+
+Responsibilities:
+
+- Display distance score
+- Show game-over screen
+- Display final score
+- Provide a restart button
+- Communicate restart requests to the main game controller
+
+#### B5. Spaceship feedback and visual effects
+
+Possible responsibilities:
+
+- Thruster flames
+- Ship animation
+- Engine particles
+- Collision feedback
+- UI transitions
+
+The initial version can use simple placeholder graphics.
+
+#### B6. Audio
+
+Possible responsibilities:
+
+- Thruster sounds
+- Collision effects
+- Game-over effects
+- Optional background audio
+
+Audio should not block the MVP.
+
+#### B7. Initial domain model
+
+Developer B will provide an independently designed domain model.
+
+Responsibilities:
+
+- Explain intended entities
+- Identify relationships
+- Describe system responsibilities
+- Compare the model to the gameplay requirements
+- Collaborate on revisions
+- Avoid implementing unapproved structural changes
+
+### Dependencies on Developer A
+
+Developer B needs:
+
+- Agreement on how planetary gravity is supplied
+- Agreement on player death notifications
+- Agreement on score updates
+- Agreement on restart behavior
+- A common viewport size
+- A common Godot version
+- Stable main scene integration points
+
+### Acceptance criteria
+
+Developer B's work is complete when:
+
+- Player scene can run in isolation
+- W/Up and S/Down controls work
+- Ship movement uses frame-independent delta timing
+- Momentum behaves consistently
+- Externally supplied gravity changes vertical motion
+- Player collision shape is configured
+- Death notifications work
+- HUD correctly displays score updates
+- Game-over panel appears when notified
+- Restart interaction emits the agreed request
+- No missing node references or script errors occur
+
+### Recommended development order
+
+1. Present the domain model.
+2. Agree on system interfaces with Developer A.
+3. Build the player scene.
+4. Implement basic vertical controls.
+5. Implement vertical velocity and acceleration.
+6. Implement gravity reception.
+7. Configure collision and death signals.
+8. Create the HUD scene.
+9. Implement score and game-over displays.
+10. Add visual feedback and audio.
+11. Help test integration and browser export.
+
+---
+
+## 4.5 Parallel Development Strategy
+
+Both developers should be able to work independently after agreeing on a few interfaces.
+
+### Parallel phase 1
+
+**Developer A:** Main scene and basic planet scene.
+
+**Developer B:** Player scene and vertical controls.
+
+### Parallel phase 2
+
+**Developer A:** Spawning, scrolling, gravity source calculations.
+
+**Developer B:** Player momentum, gravity response, collision support.
+
+### Parallel phase 3
+
+**Developer A:** Score, difficulty, game state.
+
+**Developer B:** HUD, game-over panel, restart interaction.
+
+### Parallel phase 4
+
+**Developer A:** Integration, balancing, browser export.
+
+**Developer B:** Visual polish, audio, gameplay testing.
+
+This sequence prevents one developer from waiting for the other unnecessarily.
+
+## 4.6 Shared Development Responsibilities
+
+Both developers should participate in:
+
+- Domain model review
+- Gameplay design decisions
+- Code reviews
+- Integration testing
+- Difficulty balancing
+- Debugging
+- Final export testing
+- Bug prioritization
+
+Neither developer should redesign shared interfaces unilaterally after integration has begun.
+
+---
+
+# PART 5 — SOFTWARE ARCHITECTURE
+
+## 5.1 Recommended Architectural Approach
+
+Use **Godot's scene-based architecture with component-oriented separation of concerns**.
+
+Keep the design lightweight.
+
+The intended separation is:
+
+- Player handles spaceship behavior.
+- Planet provides planet-specific properties and gravitational influence.
+- Main coordinates world simulation and overall game state.
+- HUD handles presentation and player-facing controls.
+
+This organization is loosely inspired by MVC, but it is not strict MVC.
+
+The final domain model may refine these responsibilities.
+
+## 5.2 Recommended Folder Structure
+
+```text
+OrbitBreaker/
+├── project.godot
+├── README.md
+├── .gitignore
+├── scenes/
+│   ├── main.tscn
+│   ├── player.tscn
+│   ├── planet.tscn
+│   └── hud.tscn
+├── scripts/
+│   ├── main.gd
+│   ├── player.gd
+│   ├── planet.gd
+│   └── hud.gd
+├── assets/
+│   ├── sprites/
+│   └── audio/
+└── docs/
+    └── architecture.md
+```
+
+The `docs/` directory is newly proposed.
+
+The project should not create unnecessary directories or abstraction layers until they are useful.
+
+If the domain model justifies additional classes, organize them in appropriately named folders.
+
+## 5.3 Proposed Main Scene Tree
+
+```text
+Main (Node2D)
+├── Background (Node2D)
+├── World (Node2D)
+│   └── Planets (Node2D)
+├── Player (instance of player.tscn)
+└── HUD (instance of hud.tscn)
+```
+
+Possible later additions:
+
+```text
+World
+└── Asteroids (Node2D)
+
+Main
+└── SpawnTimer (Timer)
+```
+
+An `Asteroids` container is unnecessary until asteroid functionality is approved.
+
+A `SpawnTimer` node is optional; the original example tracked elapsed spawn time in a script instead.
+
+Developer A should own `main.tscn`.
+
+## 5.4 Proposed Player Scene Tree
+
+```text
+Player (Area2D)
+├── Sprite2D
+├── CollisionShape2D
+└── ThrusterParticles
+```
+
+For the simplest MVP, only the `Area2D` and `CollisionShape2D` are required.
+
+The spaceship can be drawn directly in GDScript rather than requiring a `Sprite2D`.
+
+The original proposed collision shape was:
+
+```text
+CircleShape2D
+radius = 12
+```
+
+The original prototype drew a cyan triangle facing right.
+
+Developer B owns this scene.
+
+## 5.5 Proposed Planet Scene Tree
+
+```text
+Planet (Area2D)
+├── Sprite2D
+└── CollisionShape2D
+```
+
+For the MVP, a script can draw a simple circle.
+
+The original suggested planet radius was 35 pixels.
+
+The collision shape should match the visible planet.
+
+Developer A owns this scene.
+
+## 5.6 Proposed HUD Scene Tree
+
+```text
+HUD (CanvasLayer)
+└── Control
+    ├── ScoreLabel (Label)
+    └── GameOverPanel (PanelContainer)
+        └── VBoxContainer
+            ├── GameOverLabel (Label)
+            ├── FinalScoreLabel (Label)
+            └── RestartButton (Button)
+```
+
+The HUD is separated from the moving game world.
+
+Developer B owns the HUD scene.
+
+## 5.7 Script Responsibilities
+
+### `player.gd`
+
+Owns:
+
+- Input handling
+- Vertical acceleration
+- Vertical velocity
+- Thruster behavior
+- Applying received gravity
+- Player-specific collision signaling
+
+It should not own:
+
+- Planet spawning
+- Global distance score
+- Difficulty progression
+- World scrolling
+
+### `planet.gd`
+
+Owns:
+
+- Planet radius
+- Gravity strength
+- Planet-specific gravity calculation
+- Planet presentation and collision configuration
+
+It should not own the global game state.
+
+### `main.gd`
+
+Owns:
+
+- Main gameplay update loop
+- Planet spawning and movement
+- Distance progression
+- Difficulty
+- Game-over transitions
+- Integration between scenes
+
+The script should remain relatively small and delegate behavior to other systems when needed.
+
+### `hud.gd`
+
+Owns:
+
+- Score display
+- Final score presentation
+- Game-over visibility
+- Restart button interaction
+
+The HUD should not directly calculate gravity or spawn planets.
+
+## 5.8 Proposed Gravity Interface
+
+The original architecture used the planet to calculate gravitational acceleration.
+
+A proposed interface is:
+
+```gdscript
+func get_gravity_at(ship_position: Vector2) -> float:
+    # Return vertical gravitational acceleration.
+    pass
+```
+
+The player exposes:
+
+```gdscript
+func apply_gravity(amount: float) -> void:
+    # Receive a gravity contribution.
+    pass
+```
+
+The main scene coordinates them.
+
+Conceptually:
+
+```text
+Planet calculates gravity
+          |
+          v
+Main collects gravity values
+          |
+          v
+Player receives gravity
+          |
+          v
+Player updates vertical velocity
+          |
+          v
+Player changes vertical position
+```
+
+### Example mathematical model
+
+Let:
+
+```text
+direction = planet_position - player_position
+
+distance_squared = max(
+    length_squared(direction),
+    minimum_distance_squared
+)
+
+gravity_magnitude =
+    gravity_strength / distance_squared
+
+vertical_gravity =
+    normalized(direction).y * gravity_magnitude
+```
+
+The result is a signed vertical acceleration.
+
+This represents an inverse-square-style force approximation.
+
+It does not simulate full two-dimensional orbital mechanics.
+
+## 5.9 Previously Suggested Physics Parameters
+
+These values appeared in earlier example scripts.
+
+They are **starting points for experimentation, not finalized gameplay balance**.
+
+| Parameter | Suggested value |
+|---|---|
+| Player thrust power | 650 |
+| Player gravity multiplier | 1.0 |
+| Maximum vertical speed | 350 |
+| Planet gravity strength | 350,000 |
+| Minimum gravity distance squared | 2,500 |
+| Player collision radius | 12 |
+| Planet radius | 35 |
+| Initial scroll speed | 180 |
+| Maximum scroll speed | 350 |
+| Planet spawn interval | 3 seconds |
+| Planet spawn X | 1050 |
+| Planet spawn Y | Random from 90 to 450 |
+| Planet cleanup threshold | X less than -100 |
+| Player initial position | (180, 270) |
+| Proposed viewport | 960×540 |
+
+### Tuning warning
+
+At a distance of approximately 100 pixels, gravity strength 350,000 produces a force magnitude of approximately 35 pixels/second² before considering direction.
+
+That may feel weak relative to a thrust power of 650.
+
+The game should be balanced through testing rather than treating the initial numbers as authoritative.
+
+## 5.10 Physics Update Ordering
+
+An important technical issue was identified in the original prototype plan.
+
+The planet gravity must be applied before the player performs its physics update and clears its accumulated gravitational acceleration.
+
+The earlier recommendation was to set the main controller's physics process priority to `-1`, allowing it to apply gravity before the player updates at the default priority.
+
+An alternative is to coordinate both calculations explicitly from one physics update sequence.
+
+This ordering must be handled deliberately.
+
+Otherwise, gravity might be delayed, overwritten, or behave inconsistently.
+
+## 5.11 Proposed Scrolling and Spawning Logic
+
+The previous example used these concepts:
+
+```text
+Every physics frame:
+
+    if game is over:
+        stop updating gameplay
+
+    move all planets left
+
+    remove planets that moved offscreen
+
+    compute gravitational acceleration
+
+    apply gravity to player
+
+    update spawn timer
+
+    if spawn interval reached:
+        spawn a planet
+
+    increase traveled distance
+
+    increase scrolling speed
+
+    check collisions and boundaries
+
+    update HUD
+```
+
+The exact order should be adjusted for correct physics and collision behavior.
+
+The main requirement is predictable gameplay, not adherence to a particular loop structure.
+
+## 5.12 Collision Handling
+
+Two possible approaches have been discussed or implied.
+
+### Option A — Manual distance checking
+
+Compare the distance between the player's center and a planet's center.
+
+A collision occurs when:
+
+```text
+distance < planet_radius + player_radius
+```
+
+This matches the earlier example.
+
+It is simple for circular obstacles.
+
+### Option B — Godot Area2D collision signals
+
+Use properly configured `Area2D` collision layers and masks.
+
+Detect overlap through signals.
+
+This more directly uses Godot's collision system.
+
+**Status: Not yet decided**
+
+Whichever approach is chosen, avoid running two independent collision systems that produce duplicate death events.
+
+The domain model review may help identify the cleanest ownership.
+
+## 5.13 Game State Management
+
+The current prototype concept requires at least two logical game states:
+
+```text
+RUNNING
+GAME_OVER
+```
+
+A future design could also include:
+
+```text
+READY
+PAUSED
+```
+
+But those are optional.
+
+A minimal controller can use a Boolean such as `game_over`.
+
+A more structured implementation could use an enum:
+
+```gdscript
+enum GameState {
+    RUNNING,
+    GAME_OVER
+}
+```
+
+Neither is yet the finalized implementation.
+
+The key requirement is consistent state transitions.
+
+When the player dies:
+
+1. Mark the run as ended.
+2. Stop player control and gameplay progression.
+3. Stop increasing score.
+4. Display the final score.
+5. Display the game-over UI.
+6. Enable restart.
+
+When restarting, gameplay should reset to its initial state.
+
+The original example used:
+
+```gdscript
+get_tree().reload_current_scene()
+```
+
+This is a reasonable MVP restart method.
+
+## 5.14 Signals and Communication
+
+Godot signals are recommended for communication between independent scenes.
+
+Potential signals include:
+
+```gdscript
+signal player_died
+signal score_changed(score: int)
+signal restart_requested
+signal game_over(score: int)
+```
+
+These are **proposed API names**, not previously finalized interfaces.
+
+Suggested ownership:
+
+| Event | Emitter | Receiver |
+|---|---|---|
+| Player death | Player | Main |
+| Score change | Main | HUD |
+| Game over | Main | HUD |
+| Restart request | HUD | Main |
+
+The final design might use direct methods for simple interactions instead.
+
+For example:
+
+```gdscript
+hud.update_score(score)
+```
+
+Both approaches are valid.
+
+The important principle is that the HUD does not control world physics and the player does not directly manage UI widgets.
+
+## 5.15 Reusable Configuration Data
+
+The game may eventually benefit from external configuration values.
+
+Examples:
+
+- Thruster strength
+- Gravity multiplier
+- Planet gravity strength
+- Minimum spawn interval
+- Maximum scrolling speed
+- Planet radius
+
+Godot's exported script variables are enough for the MVP.
+
+Custom `Resource` types could be used later if there is a genuine need for reusable configuration objects.
+
+Avoid creating many abstract classes solely for architectural appearance.
+
+## 5.16 Integration Contract Between Developers
+
+Before parallel implementation, agree on a small shared interface.
+
+### Proposed Player contract
+
+```text
+Player:
+    apply_gravity(amount: float)
+    emits player_died
+```
+
+### Proposed Planet contract
+
+```text
+Planet:
+    get_gravity_at(player_position: Vector2) -> float
+    exposes radius
+```
+
+### Proposed HUD contract
+
+```text
+HUD:
+    update_score(score: int)
+    show_game_over(score: int)
+    emits restart_requested
+```
+
+### Proposed Main contract
+
+```text
+Main:
+    creates/owns game world
+    connects the player and HUD
+    tracks score and game state
+    manages restart
+```
+
+These interfaces should be reviewed against Developer B's domain model before being treated as permanent.
+
+---
+
+# PART 6 — DOMAIN MODEL INTEGRATION
+
+## 6.1 Critical Context
+
+Developer B is independently designing a domain model for Orbit Breaker.
+
+**That model has not yet been provided or reviewed.**
+
+The following section describes what the model should address, not what it already contains.
+
+Do not assume class names, inheritance structures, diagrams, or relationships from an unseen model.
+
+The actual model must be examined when Developer B supplies it.
+
+## 6.2 Purpose of the Domain Model
+
+The domain model should describe the important concepts within the game, their responsibilities, and the relationships between them.
+
+It should help clarify questions such as:
+
+- What is a player?
+- What is a planet?
+- Where does gravitational behavior belong?
+- Who manages game progression?
+- What constitutes a collision?
+- What information represents the current run?
+- How are game events communicated?
+- Which responsibilities should be independent?
+
+The domain model should reflect the agreed gameplay rather than introduce unrelated features.
+
+## 6.3 Candidate Domain Concepts
+
+The following are **candidate concepts derived from gameplay requirements**, not a finalized UML model.
+
+### Player or Spaceship
+
+Potential responsibilities:
+
+- Position
+- Velocity
+- Thruster input
+- Gravity response
+- Collision state
+- Alive/dead state
+
+### Planet
+
+Potential responsibilities:
+
+- Position
+- Radius
+- Gravity strength
+- Collision geometry
+- Visual properties
+
+### Game Session or Game Controller
+
+Potential responsibilities:
+
+- Current run status
+- Distance traveled
+- Difficulty level
+- Start and end conditions
+- Restart behavior
+
+### World or Environment
+
+Potential responsibilities:
+
+- Active celestial objects
+- World scrolling
+- Object cleanup
+- Spawn management
+
+### Spawner
+
+Potential responsibilities:
+
+- Spawn interval
+- Spawn positions
+- Difficulty-aware generation
+
+A separate Spawner class is optional.
+
+### Score
+
+Potential responsibilities:
+
+- Current distance
+- Final score
+- High score, if approved
+
+Score may be a simple numeric property rather than a dedicated class.
+
+### HUD
+
+Potential responsibilities:
+
+- Score presentation
+- Game-over presentation
+- Restart interaction
+
+The HUD is primarily a presentation component rather than a core physics entity.
+
+### Gravity behavior
+
+Potential responsibilities:
+
+- Calculate gravitational influence
+- Apply gravitational influence
+
+This may be implemented as planet behavior, a reusable component, or another service.
+
+No choice has been finalized.
+
+## 6.4 Important Relationships to Consider
+
+A proposed model should clarify:
+
+- One game session manages the active run.
+- The world contains dynamically spawned planets.
+- The player is affected by gravity from nearby planets.
+- Planets can act as collision hazards.
+- The game controller manages the active score.
+- The HUD displays game state and score.
+- Restart creates a fresh run or resets the relevant systems.
+
+Be careful when choosing inheritance versus composition.
+
+For example, the domain model should not automatically make Player inherit from Planet merely because both have positions.
+
+They may share certain properties without representing the same domain concept.
+
+## 6.5 Decisions That Must Remain Flexible
+
+Until the model has been reviewed, do not finalize:
+
+- A complete class hierarchy
+- All inheritance relationships
+- A dedicated physics manager
+- A separate world manager
+- A global autoload singleton
+- A custom state machine framework
+- A generic obstacle base class
+- A separate score class
+- A centralized event bus
+- Numerous reusable Resource types
+
+Some of these may be useful, but the MVP does not automatically require them.
+
+## 6.6 How Developer B's AI Should Evaluate the Model
+
+When the model is supplied:
+
+### Step 1 — Explain the existing model
+
+Identify:
+
+- Classes or entities
+- Attributes
+- Methods
+- Relationships
+- Association multiplicities
+- Inheritance
+- Composition
+- Dependencies
+
+Explain what the diagram or written model actually says.
+
+Do not silently correct it before explaining it.
+
+### Step 2 — Compare the model with gameplay requirements
+
+Check whether it supports:
+
+- Vertical thruster input
+- Player velocity
+- Gravity influence
+- Planet spawning
+- World scrolling
+- Collision handling
+- Distance scoring
+- Difficulty progression
+- Game-over state
+- Restart functionality
+- HUD updates
+
+Identify requirements that have no obvious owner.
+
+### Step 3 — Evaluate responsibility allocation
+
+Look for:
+
+- Excessively large classes
+- Duplicate responsibilities
+- Unnecessary coupling
+- Circular dependencies
+- Unclear ownership
+- UI logic inside physics systems
+- Spawning logic inside the Player
+- World logic duplicated between Main and another manager
+
+### Step 4 — Evaluate complexity
+
+Determine whether the design is practical for a small Godot game.
+
+A well-designed model should be sufficiently structured to support teamwork but simple enough to implement during a game jam.
+
+Do not recommend architectural complexity without a clear benefit.
+
+### Step 5 — Recommend changes
+
+For each proposed change, explain:
+
+- What should change
+- Why it should change
+- Which requirement it supports
+- Which files or responsibilities it affects
+- Whether it changes any agreed gameplay behavior
+
+### Step 6 — Obtain agreement on architectural changes
+
+Recommendations that materially affect the shared architecture must be discussed with Developer A.
+
+Do not treat a new suggestion as an approved requirement merely because Developer B's AI proposed it.
+
+## 6.7 Translating the Model into Godot
+
+Not every UML class must become a Godot scene.
+
+The correct implementation depends on the class's responsibility.
+
+| Domain concept | Possible Godot implementation |
+|---|---|
+| Player | `Area2D` scene with GDScript |
+| Planet | `Area2D` scene with GDScript |
+| Game controller | `Node2D` or `Node` with script |
+| HUD | `CanvasLayer` with Control nodes |
+| Spawner | Script or dedicated Node |
+| Game configuration | Exported properties or Resource |
+| Score | Property of the game controller, or dedicated data object |
+| Gravity calculation | Planet method, component, or helper |
+
+These mappings are starting recommendations.
+
+They are not mandatory final class definitions.
+
+## 6.8 Domain Model Conflict Resolution
+
+Suppose the supplied model suggests a mechanic or design that differs from the established game.
+
+The AI should classify the difference:
+
+### Type A — Implementation-only difference
+
+Example: The model uses a separate `GravitySystem` instead of having planets calculate gravity.
+
+This could be acceptable if the gameplay remains unchanged.
+
+### Type B — Scope expansion
+
+Example: The model adds fuel management.
+
+Fuel was previously discussed only as an optional feature.
+
+It should not automatically become required.
+
+### Type C — Gameplay contradiction
+
+Example: The model makes the player manually control horizontal spaceship movement through full orbital simulation.
+
+This conflicts with the agreed endless-runner MVP.
+
+The AI should identify the conflict and request a deliberate team decision.
+
+### Type D — Missing requirement
+
+Example: The model has planets and a player but no apparent owner for scoring or game-over state.
+
+The AI should recommend where that responsibility belongs.
+
+## 6.9 Expected Domain Model Review Output
+
+Developer B's AI should produce:
+
+1. An explanation of the supplied domain model.
+2. A requirements coverage assessment.
+3. A list of strengths.
+4. A list of missing or questionable elements.
+5. Proposed revisions.
+6. A revised model, if useful.
+7. A Godot implementation mapping.
+8. A Developer B file ownership list.
+9. Integration contracts with Developer A.
+10. A development sequence.
+
+The approved model should then become part of the shared project documentation.
+
+---
+
+# PART 7 — COLLABORATIVE GITHUB WORKFLOW
+
+## 7.1 Repository
+
+The repository is:
+
+https://github.com/EzaanSaeed/OrbitBreaker
+
+It is shared by both developers.
+
+Both developers work on separate local copies of the same Godot project.
+
+A GitHub repository is the shared source of truth for committed project files.
+
+## 7.2 Main Branch
+
+Use:
+
+```text
+main
+```
+
+The `main` branch should contain code that is integrated and reasonably stable.
+
+Avoid using it as the place for unfinished experimental features.
+
+## 7.3 Feature Branches
+
+Recommended branch names:
+
+```text
+feature/player-controls
+feature/player-gravity
+feature/world-scrolling
+feature/planet-spawning
+feature/game-state
+feature/score-system
+feature/hud
+feature/audio-effects
+fix/collision-detection
+fix/gravity-update-order
+```
+
+Each branch should have a focused purpose.
+
+Branches do not need to be created for every tiny edit.
+
+## 7.4 Starting a Feature
+
+Before beginning new work:
+
+```bash
+git switch main
+git pull origin main
+```
+
+Create a branch:
+
+```bash
+git switch -c feature/player-controls
+```
+
+Make the changes inside Godot or the chosen external editor.
+
+## 7.5 Committing Changes
+
+Example:
+
+```bash
+git status
+git add scenes/player.tscn scripts/player.gd
+git commit -m "feat: implement vertical thruster controls"
+git push -u origin feature/player-controls
+```
+
+For later pushes from the same branch:
+
+```bash
+git push
+```
+
+Prefer staging only the relevant files instead of blindly staging unrelated changes.
+
+## 7.6 Commit Naming Recommendations
+
+Use understandable commit messages.
+
+Examples:
+
+```text
+feat: implement vertical thruster movement
+feat: add planet spawning
+feat: implement planetary gravity
+feat: add game-over UI
+fix: prevent duplicate death events
+fix: remove planets after leaving screen
+refactor: simplify gravity calculations
+docs: update architecture and team roles
+assets: add spaceship sprite
+```
+
+The exact naming convention is recommended rather than mandatory.
+
+## 7.7 Pull Requests
+
+After finishing a focused feature:
+
+1. Push the feature branch.
+2. Open a pull request against `main`.
+3. Explain the changes.
+4. Explain how the feature was tested.
+5. Identify any dependency on unfinished work.
+6. Ask the other developer to review.
+7. Merge after both developers are satisfied.
+
+### Suggested pull request description
+
+```text
+Feature:
+Implemented spaceship vertical movement.
+
+Files changed:
+- scenes/player.tscn
+- scripts/player.gd
+
+Testing:
+- Opened the player scene in Godot
+- Verified Up/Down movement
+- Verified W/S movement
+- Checked for script errors
+
+Dependencies:
+Requires integration into main.tscn.
+```
+
+## 7.8 File Ownership Rules
+
+To reduce merge conflicts:
+
+| File | Primary owner |
+|---|---|
+| `scenes/main.tscn` | Developer A |
+| `scripts/main.gd` | Developer A |
+| `scenes/planet.tscn` | Developer A |
+| `scripts/planet.gd` | Developer A |
+| `scenes/player.tscn` | Developer B |
+| `scripts/player.gd` | Developer B |
+| `scenes/hud.tscn` | Developer B |
+| `scripts/hud.gd` | Developer B |
+| `project.godot` | Coordinate changes |
+| `README.md` | Shared |
+| `docs/architecture.md` | Shared |
+
+These are proposed ownership rules reflecting the new two-person arrangement.
+
+Developers may modify another person's file when necessary, but should coordinate significant changes.
+
+## 7.9 Godot-Specific Git Considerations
+
+Godot stores scenes and scripts in text-based formats that Git can track.
+
+However, scene files can produce awkward merge conflicts if both developers edit the same scene structure.
+
+The team should therefore:
+
+- Use separate reusable scenes.
+- Avoid concurrent edits to `main.tscn`.
+- Keep file references valid.
+- Commit accompanying scene/script changes together.
+- Use compatible Godot versions.
+- Reopen the game after merges.
+- Avoid committing generated editor cache files.
+
+The `.gitignore` should include the Godot cache directory:
+
+```gitignore
+.godot/
+```
+
+Do not casually delete or rewrite shared project configuration.
+
+Godot resource identifiers and scene references should be preserved unless there is a clear reason to change them.
+
+## 7.10 Integrating Completed Features
+
+Example integration sequence:
+
+1. Developer B completes `player.tscn`.
+2. Developer B pushes the Player feature branch.
+3. Developer A reviews and merges it.
+4. Developer A pulls the updated `main`.
+5. Developer A instantiates `player.tscn` inside `main.tscn`.
+6. Developer A connects the necessary interface.
+7. Both developers test the merged game.
+8. Integration fixes receive new commits.
+
+The same procedure applies to HUD integration.
+
+## 7.11 Keeping Both Computers Synchronized
+
+Before starting work:
+
+```bash
+git switch main
+git pull origin main
+```
+
+Then switch to or create the appropriate feature branch.
+
+Before integrating:
+
+```bash
+git fetch origin
+```
+
+Review whether the target branch has advanced.
+
+After merging a pull request:
+
+```bash
+git switch main
+git pull origin main
+```
+
+Do not use `git push --force` on the shared `main` branch.
+
+## 7.12 Team Testing Responsibilities
+
+Both developers should check:
+
+- Godot project opens
+- No missing resources
+- No script parse errors
+- No broken scene references
+- Gravity works
+- Controls work
+- Collision works
+- Score updates
+- Restart works
+- Browser build runs
+
+Passing a code review does not replace playing the integrated game.
+
+## 7.13 AI-Assisted Development Rules
+
+AI coding tools may help produce code, but both developers remain responsible for understanding and verifying changes.
+
+Recommended practices:
+
+- Ask AI to inspect relevant files before editing.
+- Limit changes to the assigned feature.
+- Review generated code.
+- Run the Godot project after changes.
+- Do not accept unexplained architecture changes.
+- Do not commit API keys or credentials.
+- Avoid assigning AI tools unrestricted changes across the repository.
+
+The team has discussed ChatGPT/Codex and Claude Code, but no AI tool integration is required for the project.
+
+---
+
+# PART 8 — DEVELOPMENT ROADMAP
+
+The roadmap starts from the actual known project state: project and GitHub setup complete, gameplay implementation not yet verified.
+
+Milestones are based on working functionality rather than arbitrary deadlines.
+
+The overall game jam remains time-constrained, so the team should complete a working MVP before adding optional systems.
+
+## Milestone 1 — Project Foundation
+
+### Developer A
+
+- [ ] Verify GitHub contains `project.godot`.
+- [ ] Verify both developers use compatible Godot versions.
+- [ ] Configure the agreed game viewport.
+- [ ] Create `scenes/`, `scripts/`, and asset directories.
+- [ ] Create or verify `main.tscn`.
+- [ ] Make Main the startup scene.
+- [ ] Establish the basic scene tree.
+
+### Developer B
+
+- [ ] Clone and open the project.
+- [ ] Present the independent domain model.
+- [ ] Review responsibility boundaries.
+- [ ] Establish the Player scene structure.
+- [ ] Agree on input actions and physics interfaces.
+- [ ] Create a Player feature branch.
+
+### Shared work
+
+- [ ] Review the domain model.
+- [ ] Agree on key integration interfaces.
+- [ ] Confirm the two-person work allocation.
+- [ ] Update README team information.
+- [ ] Confirm both developers can run the project.
+
+### Completion criteria
+
+Both developers can open and run the same basic Godot project from GitHub without errors.
+
+---
+
+## Milestone 2 — Minimum Viable Playable Prototype
+
+**Goal:** A controllable spaceship influenced by one planet.
+
+### Developer A
+
+- [ ] Create `planet.tscn`.
+- [ ] Implement a basic planetary gravity calculation.
+- [ ] Place a test planet inside the Main scene.
+- [ ] Instantiate Developer B's Player scene.
+- [ ] Supply gravity values to the Player.
+
+### Developer B
+
+- [ ] Implement vertical input.
+- [ ] Implement acceleration and velocity.
+- [ ] Configure the Player collision shape.
+- [ ] Implement gravity reception.
+- [ ] Draw or display a placeholder spaceship.
+
+### Integration
+
+- [ ] Instantiate the Player scene.
+- [ ] Position Player at approximately `(180, 270)`.
+- [ ] Add one planet.
+- [ ] Verify gravity influences movement.
+- [ ] Verify thrusters can counteract gravity.
+- [ ] Confirm physics update ordering is correct.
+
+### Completion criteria
+
+A spaceship visibly moves up and down, and a nearby planet changes its trajectory.
+
+This is the foundational gameplay proof of concept.
+
+---
+
+## Milestone 3 — Core Endless Runner
+
+**Goal:** Convert the one-planet prototype into a continuously playable survival game.
+
+### Developer A
+
+- [ ] Implement leftward scrolling.
+- [ ] Implement repeated planet spawning.
+- [ ] Randomize vertical spawn positions.
+- [ ] Remove offscreen planets.
+- [ ] Add distance accumulation.
+- [ ] Add the basic game-over state.
+
+### Developer B
+
+- [ ] Finalize player movement behavior.
+- [ ] Implement or connect collision notifications.
+- [ ] Ensure player behavior stops on death.
+- [ ] Test gravity from multiple planets.
+- [ ] Refine the Player scene API.
+
+### Shared integration
+
+- [ ] Verify repeated spawning.
+- [ ] Verify the planet cleanup system.
+- [ ] Verify collisions end the run.
+- [ ] Verify leaving the screen ends the run.
+- [ ] Verify score increases during survival.
+
+### Completion criteria
+
+The player can survive an endless stream of planets until a collision or boundary violation ends the run.
+
+---
+
+## Milestone 4 — Game Progression and Restart
+
+### Developer A
+
+- [ ] Implement difficulty progression.
+- [ ] Implement final score reporting.
+- [ ] Stop gameplay after game over.
+- [ ] Implement scene restart behavior.
+- [ ] Adjust spawning to avoid clearly impossible patterns.
+
+### Developer B
+
+- [ ] Create HUD score display.
+- [ ] Create game-over panel.
+- [ ] Create restart button.
+- [ ] Add restart event signaling.
+- [ ] Display the final score.
+
+### Integration
+
+- [ ] Connect Main to HUD.
+- [ ] Connect restart request to game logic.
+- [ ] Confirm repeated restarts work.
+- [ ] Confirm score resets.
+- [ ] Confirm no stale planets remain after restarting.
+
+### Completion criteria
+
+The game supports a complete play–lose–restart loop.
+
+---
+
+## Milestone 5 — Additional Mechanics and Content
+
+This milestone is optional and should only begin after the full MVP works.
+
+Potential additions:
+
+- [ ] Asteroid hazards
+- [ ] Additional planet variations
+- [ ] Near-miss scoring
+- [ ] More complex spawn patterns
+- [ ] Improved gravity balancing
+- [ ] High-score tracking
+- [ ] Additional challenge modifiers
+
+### Developer A
+
+Implement approved changes to spawning, obstacles, and progression.
+
+### Developer B
+
+Implement approved Player behavior changes, feedback, and associated HUD changes.
+
+### Shared decision
+
+Select optional features based on fun, implementation effort, and gameplay stability.
+
+### Completion criteria
+
+Any accepted feature works without breaking the core game.
+
+If time is limited, skip this milestone.
+
+---
+
+## Milestone 6 — UI, Graphics, and Polish
+
+### Developer A
+
+- [ ] Improve background behavior.
+- [ ] Add simple parallax scrolling if appropriate.
+- [ ] Balance planet placement.
+- [ ] Improve difficulty progression.
+- [ ] Optimize object cleanup.
+
+### Developer B
+
+- [ ] Improve spaceship visuals.
+- [ ] Improve planet sprites where needed.
+- [ ] Add thruster effects.
+- [ ] Improve HUD presentation.
+- [ ] Add sound effects.
+- [ ] Improve game-over feedback.
+
+### Shared work
+
+- [ ] Test readability of obstacles.
+- [ ] Test whether gravity is understandable.
+- [ ] Confirm UI remains visible.
+- [ ] Remove distracting or confusing effects.
+
+### Completion criteria
+
+The game is visually understandable, responsive, and reasonably polished.
+
+---
+
+## Milestone 7 — Testing and Bug Fixing
+
+### Developer A
+
+Test:
+
+- World scrolling
+- Planet spawning
+- Object cleanup
+- Difficulty progression
+- Game-over state
+- Score correctness
+- Scene restart
+
+### Developer B
+
+Test:
+
+- Keyboard controls
+- Momentum behavior
+- Gravity response
+- Collision detection
+- UI behavior
+- Restart interactions
+- Player physics at different frame rates
+
+### Shared edge-case testing
+
+- [ ] Player moves beyond top boundary.
+- [ ] Player moves beyond bottom boundary.
+- [ ] Planet collides with the player.
+- [ ] Multiple planets influence the player.
+- [ ] Player survives for an extended period.
+- [ ] Player restarts repeatedly.
+- [ ] No duplicate game-over events occur.
+- [ ] No unexpected objects remain after restart.
+- [ ] Godot reports no relevant script errors.
+
+### Completion criteria
+
+The integrated project is stable enough for repeated full play sessions.
+
+---
+
+## Milestone 8 — Playable Release
+
+### Developer A
+
+- [ ] Configure Godot web export.
+- [ ] Install export templates if needed.
+- [ ] Export the game.
+- [ ] Upload or prepare the itch.io submission.
+- [ ] Confirm the repository contains the final source.
+
+### Developer B
+
+- [ ] Test the browser build.
+- [ ] Verify keyboard input in the browser.
+- [ ] Confirm HUD scaling and screen dimensions.
+- [ ] Verify sound and visual effects.
+- [ ] Check game-over and restart behavior.
+
+### Shared release checks
+
+- [ ] Export completes successfully.
+- [ ] Browser build loads.
+- [ ] Player can control the spaceship.
+- [ ] Gravity and collisions work.
+- [ ] Score works.
+- [ ] Restart works.
+- [ ] No critical errors remain.
+- [ ] Final changes are committed and pushed.
+
+### Completion criteria
+
+Orbit Breaker is playable through its intended web distribution method.
+
+---
+
+# PART 9 — IMMEDIATE NEXT STEPS
+
+## 9.1 First Priority — Verify the Shared Project
+
+### Developer A
+
+- [ ] Open the local Orbit Breaker directory.
+- [ ] Run `git status`.
+- [ ] Run `git remote -v`.
+- [ ] Confirm the remote points to the correct repository.
+- [ ] Confirm the initial project files are visible on GitHub.
+- [ ] Open the project in Godot.
+- [ ] Verify its configured renderer and viewport.
+
+### Developer B
+
+- [ ] Clone the repository.
+- [ ] Open `project.godot` in Godot.
+- [ ] Confirm the project starts without errors.
+- [ ] Confirm access to the repository for future pushes.
+- [ ] Use the same Godot version as Developer A.
+
+## 9.2 Second Priority — Domain Model Review
+
+### Developer B
+
+- [ ] Provide the domain model to their ChatGPT assistant.
+- [ ] Ask the assistant to explain every entity and relationship.
+- [ ] Compare the model with the game requirements in this document.
+- [ ] Identify any conflicts.
+- [ ] Prepare a recommended implementation mapping.
+
+### Developer A
+
+- [ ] Review the domain model recommendations.
+- [ ] Identify anything that changes planned Main, Planet, or World responsibilities.
+- [ ] Approve or discuss shared interfaces.
+- [ ] Confirm ownership before implementation begins.
+
+### Both developers
+
+- [ ] Agree on the Player–Planet gravity interface.
+- [ ] Agree on death/collision signaling.
+- [ ] Agree on score-to-HUD communication.
+- [ ] Agree on restart behavior.
+- [ ] Confirm file ownership.
+
+**The domain model should guide implementation, not prevent independent prototype work from starting.**
+
+For example, Developer B can create a Player scene with basic input while the domain model is reviewed, provided its architecture remains easy to revise.
+
+## 9.3 Third Priority — Implement the First Prototype
+
+### Developer A's next technical tasks
+
+1. Create `scenes/main.tscn`.
+2. Create `scenes/planet.tscn`.
+3. Create `scripts/planet.gd`.
+4. Configure a visible planet.
+5. Implement a gravity calculation method.
+6. Prepare the Main scene to instantiate the Player.
+
+### Developer B's next technical tasks
+
+1. Create `scenes/player.tscn`.
+2. Create `scripts/player.gd`.
+3. Configure the collision shape.
+4. Draw or display a basic spaceship.
+5. Implement vertical thruster input.
+6. Implement velocity and acceleration.
+7. Add the agreed gravity-reception interface.
+
+### First integration objective
+
+Make a spaceship respond to gravity from one planet.
+
+Do not prioritize scores, asteroids, menus, or elaborate graphics until this works.
+
+## 9.4 Fourth Priority — Add Endless Gameplay
+
+Once the gravity prototype works:
+
+### Developer A
+
+- [ ] Add leftward scrolling.
+- [ ] Add endless planet spawning.
+- [ ] Add planet cleanup.
+- [ ] Add distance tracking.
+- [ ] Add game-over behavior.
+
+### Developer B
+
+- [ ] Complete player collision behavior.
+- [ ] Create a basic HUD.
+- [ ] Display score.
+- [ ] Display game over.
+- [ ] Add restart interaction.
+
+## 9.5 What Should Wait
+
+These should not block early progress:
+
+- Advanced visual effects
+- Complex asset pipelines
+- Multiple planet classes
+- Asteroids
+- Fuel systems
+- Near-miss bonuses
+- Full orbital physics
+- Persistent leaderboards
+- Complex game state frameworks
+- Large inheritance hierarchies
+- Backend services
+- Multiplayer
+- Mobile support
+
+The team should prioritize the endless-runner MVP.
+
+## 9.6 Readiness Checklist for the Next Milestone
+
+Before considering the foundation complete:
+
+- [ ] Both developers can open the repository.
+- [ ] Both developers can run the Godot project.
+- [ ] The project uses GDScript.
+- [ ] The project has a clear starting scene.
+- [ ] The Player and Planet responsibilities are agreed.
+- [ ] The domain model has been reviewed sufficiently for current implementation.
+- [ ] The developers know which files they own.
+- [ ] Changes can be merged without overwriting one another.
+
+Before considering the first playable prototype complete:
+
+- [ ] A spaceship appears on screen.
+- [ ] Up/W moves it upward.
+- [ ] Down/S moves it downward.
+- [ ] Gravity changes its trajectory.
+- [ ] Thrusters allow the player to respond to gravity.
+- [ ] No critical script errors occur.
+
+---
+
+# PART 10 — INSTRUCTIONS FOR DEVELOPER B'S CHATGPT
+
+## Assistant Handoff Instructions
+
+You are now assisting **Developer B with Orbit Breaker**, a collaborative Godot game development project. The preceding document contains the project's established context and current plan.
+
+Treat finalized decisions as requirements and proposed ideas as flexible. Do not redesign the game unnecessarily or invent previously agreed details.
+
+Developer B will next provide a domain model they have designed.
+
+When they provide it:
+
+1. **Analyze and explain the domain model.** Identify its entities, attributes, methods, relationships, inheritance, associations, and intended responsibilities.
+
+2. **Compare it against the established game design and requirements.** The game is a 2D Godot endless runner where a spaceship uses vertical thrusters to survive planetary gravity while the world scrolls horizontally.
+
+3. **Identify missing entities, questionable relationships, and architectural improvements.** Check for missing gameplay responsibilities, excessive coupling, duplicate logic, unnecessary abstractions, and conflicts with the established design.
+
+4. **Recommend necessary changes while preserving our agreed game mechanics.** Clearly distinguish essential corrections from optional improvements. Never silently introduce new gameplay requirements.
+
+5. **Translate the resulting model into a practical Godot implementation.** Explain what should become a scene, node, script, reusable component, Resource, or signal.
+
+6. **Identify exactly which scripts, scenes, and systems Developer B should implement.** The proposed responsibilities include the Player scene, vertical movement, thruster physics, gravity response, player collision support, HUD, game-over interface, restart interaction, and visual/audio feedback.
+
+7. **Explain how those components integrate with Developer A's responsibilities.** Developer A is expected to own Main, planets, world scrolling, spawning, score progression, difficulty, overall game state, and integration. Treat this revised allocation as a proposal until approved by both developers.
+
+8. **Provide step-by-step development guidance and Godot GDScript when requested.** Assume the developers understand general programming but are learning Godot. Explain node creation, script attachment, signals, input configuration, scene instantiation, testing, and debugging clearly.
+
+9. **Respect our shared GitHub workflow and avoid unnecessary changes to Developer A's files.** The shared repository is https://github.com/EzaanSaeed/OrbitBreaker. Recommend feature branches, focused commits, pull requests, and integration testing. Do not propose force-pushing shared history.
+
+10. **Maintain continuity with this handoff throughout subsequent development.** Preserve finalized decisions, track newly approved architecture, distinguish completed work from suggestions, and keep the implementation practical for a 24-hour game jam.
+
+## Additional Rules for Developer B's Assistant
+
+### Rule 1 — Do not assume implementation progress
+
+The known baseline is an initialized Godot project and established GitHub repository.
+
+Most gameplay systems have been planned but have not been verified as implemented.
+
+Inspect actual files or request relevant file contents before claiming that code exists.
+
+### Rule 2 — Do not invent the domain model
+
+Wait for Developer B to provide it.
+
+Explain the supplied model before making changes.
+
+Do not pretend the candidate concepts in this document form an approved UML design.
+
+### Rule 3 — Preserve the game concept
+
+Orbit Breaker is an endless runner with planetary gravity.
+
+It is not the earlier spaceship traffic-control game.
+
+It is not the earlier fuel-less wormhole puzzle.
+
+Do not switch genres or fundamental controls without an explicit team decision.
+
+### Rule 4 — Minimize unnecessary complexity
+
+Favor understandable GDScript, simple Godot scenes, and clear responsibilities.
+
+Do not introduce complex design patterns merely to demonstrate software architecture.
+
+### Rule 5 — Keep both developers productive
+
+Prefer stable interfaces that allow Developer A and Developer B to implement systems in parallel.
+
+Avoid unnecessary edits to the same scene files.
+
+### Rule 6 — Prioritize a playable MVP
+
+The immediate objective is:
+
+**A spaceship moving vertically while planetary gravity affects it.**
+
+The next objective is:
+
+**An endless stream of planets with collision-based survival, scoring, game over, and restart.**
+
+Optional features should wait until this loop works.
+
+### Rule 7 — Maintain an explicit decision record
+
+When a new decision is approved, distinguish:
+
+- Previous design
+- New design
+- Reason for the change
+- Affected files
+- Developer responsible
+- Impact on existing systems
+
+Avoid treating AI suggestions as team-approved decisions.
+
+## Expected Next Interaction
+
+Developer B will paste or upload the independently designed domain model.
+
+Your first response should:
+
+1. Restate your understanding of the supplied model.
+2. Compare it to Orbit Breaker's finalized requirements.
+3. Identify what fits and what needs improvement.
+4. Propose a practical Godot class/scene mapping.
+5. Highlight architectural decisions requiring agreement with Developer A.
+6. Establish a concrete development plan for Developer B.
+
+Do not begin by replacing the entire architecture or generating dozens of scripts without first understanding the model.
+
+---
+
+# FINAL PROJECT STATUS SUMMARY
+
+| Category | Current position |
+|---|---|
+| Project name | Orbit Breaker |
+| Theme | COSMOS |
+| Genre | 2D endless runner |
+| Core mechanic | Planetary gravity and vertical thrusters |
+| Objective | Survive and maximize distance |
+| Engine | Godot 4 |
+| Language | GDScript |
+| Platform | Desktop browser |
+| Intended publisher | itch.io |
+| Architecture | Godot scene-based, lightweight MVC-inspired separation |
+| Team | Two developers |
+| Repository | EzaanSaeed/OrbitBreaker |
+| Initial project | Created |
+| Initial Git setup | Completed |
+| GitHub push | Reported completed |
+| Playable prototype | Not yet verified |
+| Final domain model | Awaiting Developer B's submission |
+| Immediate focus | Player movement and planetary gravity |
+
+## Guiding Principle
+
+**Build a simple, playable gravity-based endless runner first. Organize the code so both developers can contribute independently, and improve the architecture only where it makes the game easier to build, test, and maintain.**
+
+This handoff is the current shared context for Orbit Breaker. Future decisions should extend or explicitly revise it rather than silently contradict it.
