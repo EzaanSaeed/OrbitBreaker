@@ -18,6 +18,7 @@ func _run() -> void:
 func _test_fuel() -> void:
 	var fuel := ThrusterFuel.new()
 	root.add_child(fuel)
+	fuel.drain_per_second = 5.0                       # fixed rate: tests mechanics, not tuning
 	var events: Array = []
 	fuel.fuel_changed.connect(func(c, m): events.append([c, m]))
 	assert(fuel.fuel == 100.0 and fuel.max_fuel == 100.0 and not fuel.is_empty())

@@ -106,7 +106,12 @@ Team is now three: **Developer C** owns `hud.gd`/`hud.tscn`, menus, VFX, sound a
 | HUD | C | `update_score(int)`, `update_health(int, int)`, `update_ammo(int)`, `update_fuel(float, float)`, `show_game_over(int)`, `restart_requested`. GameController pushes all values; the HUD never reads the Player |
 | Pickups | A (World) | `bullet_pickup_scene` slot; pickups every 6 s, equally health / fuel / ammo |
 
-**Tuning (tested 2026-11-14):** fuel drain 5/s (20 s of continuous thrust), ThrusterBooster +50 fuel, pickup every 6 s. Autopilot playtests with a player thrusting ~27% of the time: average fuel ~57%, first empty around 110-150 s (late game, at top speed). 6/s ran dry by ~60 s; 3/s never mattered; pickups every 8 s ran dry sooner. Fire rate (0.2 s) and bullet speed (720): Developer B.
+**Tuning (playtest-chosen 2026-11-14, rollback tag `tuning-baseline-2026-11-14`):**
+- Feel: planet pull 2 250 000 (×1.5 of the original), ship drag 2.0/s (set in GameController), thrust 750 and top speed 320 (set on the Player instance in `main.tscn`, so `player.gd` is unchanged).
+- Density: asteroids every 1.0 s (was 1.5), pickups every 4 s (was 6), equally likely health / fuel / ammo (fuel at 2x felt like it was everywhere).
+- Fuel: drain 3/s (was 5), ThrusterBooster +50. Autopilot thrusting ~32% of the time: with equal pickup weights fuel never ran dry in 150 s runs (min 23%); deaths come from hazards, not fuel.
+- Debug-only keys 0-6 (`scripts/tuning_presets.gd`) switch between Baseline / Light / Medium / Strong / Heavy / Extreme / Chosen while playtesting; removed in release builds.
+- Tests pin `drain_per_second = 5` where they check fuel arithmetic, so retuning doesn't break them.
 
 **Sequencing risks**
 - ThrusterBooster's refill change goes in **the same PR as Developer B's fuel hook**, together with updates to B's tests that still expect the 1.5× boost.

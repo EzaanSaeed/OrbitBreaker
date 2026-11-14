@@ -15,11 +15,11 @@ extends Node
 signal fuel_changed(current: float, maximum: float)
 
 @export var max_fuel: float = 100.0
-## Fuel used per second of thrust: a full tank is 20 s of holding W or S.
-## Tuned by autopilot playtests (player thrusting ~27% of the time): fuel stays
-## comfortable for ~2 minutes and first runs dry around 110-150 s, once the game
-## is at top speed. 6/s ran dry by ~60 s (too harsh); 3/s never mattered.
-@export var drain_per_second: float = 5.0
+## Fuel used per second of thrust: a full tank is ~33 s of holding W or S.
+## Retuned 2026-11-14 for the stronger pull, ship drag and denser asteroids:
+## autopilot (thrusting ~32% of the time, equal pickup weights) keeps fuel above
+## ~20% for 150 s runs; at the old 5/s it ran dry at ~65 s, 4/s at ~90-105 s.
+@export var drain_per_second: float = 3.0
 
 var fuel: float = 0.0
 

@@ -29,7 +29,8 @@ func _run() -> void:
 	fixture.add_child(player)
 	player.set_physics_process(false)
 	assert(player.fuel == player.get_node("ThrusterFuel"))
-	assert(player.fuel.fuel == 100 and player.fuel.drain_per_second == 5)
+	assert(player.fuel.fuel == 100 and player.fuel.drain_per_second > 0)
+	player.fuel.drain_per_second = 5   # fixed rate: the checks below test mechanics, not tuning
 	var fuel_events: Array = []
 	player.fuel.fuel_changed.connect(func(value, maximum): fuel_events.append([value, maximum]))
 	_key(KEY_S, true)

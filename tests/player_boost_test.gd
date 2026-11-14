@@ -14,6 +14,7 @@ func _run() -> void:
 	for property in player.get_property_list():
 		assert(property.name not in ["thrust_multiplier", "boost_time_remaining"])
 	var pickup = load("res://scripts/thruster_booster.gd").new()
+	player.fuel.drain_per_second = 5.0   # fixed rate: tests mechanics, not tuning
 	player.fuel.drain(14.0)
 	assert(player.fuel.fuel == 30.0)
 	pickup.apply_effect(player)
