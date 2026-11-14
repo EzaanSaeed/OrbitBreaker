@@ -14,6 +14,9 @@ const FRAMES: Array[Texture2D] = [
 ]
 ## Seconds per flicker frame.
 const FLICKER: float = 0.06
+## Flame lengths as a fraction of the 40 px art.
+const REAR_LENGTH: float = 0.6
+const SIDE_LENGTH: float = 0.55
 
 var _ship: Spaceship
 var _rear: Sprite2D
@@ -26,9 +29,9 @@ func _ready() -> void:
 	_ship = get_parent() as Spaceship
 	# The flame art points down with its wide end at the top (the nozzle);
 	# offset so each sprite's nozzle sits at its node position.
-	_rear = _make_flame(Vector2(-11, 0), PI / 2.0, Vector2(0.45, 0.4))   # points left
-	_below = _make_flame(Vector2(-2, 8), 0.0, Vector2(0.45, 0.45))       # points down
-	_above = _make_flame(Vector2(-2, -8), PI, Vector2(0.45, 0.45))       # points up
+	_rear = _make_flame(Vector2(-12, 0), PI / 2.0, Vector2(0.75, REAR_LENGTH))   # points left
+	_below = _make_flame(Vector2(-3, 11), 0.0, Vector2(0.6, SIDE_LENGTH))       # points down
+	_above = _make_flame(Vector2(-3, -11), PI, Vector2(0.6, SIDE_LENGTH))       # points up
 	z_index = -1   # behind the ship
 
 
@@ -57,6 +60,6 @@ func _process(delta: float) -> void:
 		sprite.texture = frame
 	# Slight size wobble so the flame looks alive.
 	var wobble := 1.0 + 0.12 * sin(_time * 40.0)
-	_rear.scale.y = 0.4 * wobble
-	_below.scale.y = 0.45 * wobble
-	_above.scale.y = 0.45 * wobble
+	_rear.scale.y = REAR_LENGTH * wobble
+	_below.scale.y = SIDE_LENGTH * wobble
+	_above.scale.y = SIDE_LENGTH * wobble

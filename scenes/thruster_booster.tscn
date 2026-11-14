@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3]
 
 [ext_resource type="Script" path="res://scripts/thruster_booster.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/kenney/pickups/bolt_gold.png" id="2_icon"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_pickup"]
 radius = 16.0
@@ -16,12 +17,6 @@ script = ExtResource("1_script")
 shape = SubResource("CircleShape2D_pickup")
 disabled = false
 
-[node name="Badge" type="Polygon2D" parent="."]
-color = Color(1, 0.65, 0.05, 1)
-polygon = PackedVector2Array(0, -16, 14, -8, 14, 8, 0, 16, -14, 8, -14, -8)
-antialiased = true
-
-[node name="Symbol" type="Polygon2D" parent="."]
-color = Color(0.025, 0.06, 0.09, 1)
-polygon = PackedVector2Array(1, -12, -9, 2, -1, 2, -4, 12, 10, -4, 2, -4, 6, -12)
-antialiased = true
+[node name="Sprite" type="Sprite2D" parent="."]
+scale = Vector2(1.1, 1.1)
+texture = ExtResource("2_icon")

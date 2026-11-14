@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" path="res://scenes/bullet_pickup.tscn" id="10_ammo"]
 [ext_resource type="Script" path="res://scripts/tuning_presets.gd" id="11_tuning"]
 [ext_resource type="Script" path="res://scripts/thruster_flame.gd" id="12_flame"]
+[ext_resource type="Texture2D" path="res://assets/kenney/backgrounds/darkPurple.png" id="13_bg"]
 
 [node name="Main" type="Node2D" unique_id=1538353141 node_paths=PackedStringArray("world", "player", "hud", "background")]
 script = ExtResource("1_tbgi4")
@@ -18,6 +19,16 @@ world = NodePath("World")
 player = NodePath("Player")
 hud = NodePath("HUD")
 background = NodePath("Background")
+
+[node name="Backdrop" type="CanvasLayer" parent="." unique_id=1730004601]
+layer = -10
+
+[node name="Tile" type="TextureRect" parent="Backdrop" unique_id=1730004602]
+modulate = Color(0.45, 0.45, 0.55, 1)
+offset_right = 960.0
+offset_bottom = 540.0
+texture = ExtResource("13_bg")
+stretch_mode = 1
 
 [node name="Background" type="Node2D" parent="." unique_id=1730004211]
 script = ExtResource("9_stars")

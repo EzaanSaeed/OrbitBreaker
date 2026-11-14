@@ -40,6 +40,10 @@ var _pickup_pulse_remaining: float = 0.0
 var _pickup_pulse_color: Color = Color.GREEN
 var _ship_visual: Polygon2D
 var _ship_base_color: Color = Color.CYAN
+## Kenney "Space Shooter Remastered" ship (CC0). Faces up in the art, so it is
+## drawn turned 90 degrees to face the flight direction (right).
+const _SHIP_TEXTURE: Texture2D = preload("res://assets/kenney/ship/playerShip1_blue.png")
+const _SHIP_SCALE: float = 0.34
 
 
 func _ready() -> void:
@@ -76,10 +80,11 @@ func _draw() -> void:
 	if is_instance_valid(_ship_visual):
 		_ship_visual.color = _ship_base_color.lerp(
 			Color(1.0, 0.15, 0.15), _damage_flash_remaining / _DAMAGE_FLASH_DURATION)
-	draw_colored_polygon(
-		PackedVector2Array([Vector2(16, 0), Vector2(-10, -10), Vector2(-10, 10)]),
-		Color.CYAN.lerp(Color(1.0, 0.15, 0.15), _damage_flash_remaining / _DAMAGE_FLASH_DURATION)
-	)
+	var flash := Color.WHITE.lerp(Color(1.0, 0.25, 0.25), _damage_flash_remaining / _DAMAGE_FLASH_DURATION)
+	var size := _SHIP_TEXTURE.get_size() * _SHIP_SCALE
+	draw_set_transform(Vector2.ZERO, PI / 2.0)
+	draw_texture_rect(_SHIP_TEXTURE, Rect2(-size / 2.0, size), false, flash)
+	draw_set_transform(Vector2.ZERO)
 	if _pickup_pulse_remaining > 0.0:
 		var progress := 1.0 - _pickup_pulse_remaining / _PICKUP_PULSE_DURATION
 		var color := _pickup_pulse_color

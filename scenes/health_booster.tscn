@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3]
 
 [ext_resource type="Script" path="res://scripts/health_booster.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/kenney/pickups/pill_green.png" id="2_icon"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_pickup"]
 radius = 16.0
@@ -16,12 +17,6 @@ script = ExtResource("1_script")
 shape = SubResource("CircleShape2D_pickup")
 disabled = false
 
-[node name="Badge" type="Polygon2D" parent="."]
-color = Color(0.15, 1, 0.3, 1)
-polygon = PackedVector2Array(16.0000, 0.0000, 15.6926, 3.1214, 14.7821, 6.1229, 13.3035, 8.8891, 11.3137, 11.3137, 8.8891, 13.3035, 6.1229, 14.7821, 3.1214, 15.6926, 0.0000, 16.0000, -3.1214, 15.6926, -6.1229, 14.7821, -8.8891, 13.3035, -11.3137, 11.3137, -13.3035, 8.8891, -14.7821, 6.1229, -15.6926, 3.1214, -16.0000, 0.0000, -15.6926, -3.1214, -14.7821, -6.1229, -13.3035, -8.8891, -11.3137, -11.3137, -8.8891, -13.3035, -6.1229, -14.7821, -3.1214, -15.6926, -0.0000, -16.0000, 3.1214, -15.6926, 6.1229, -14.7821, 8.8891, -13.3035, 11.3137, -11.3137, 13.3035, -8.8891, 14.7821, -6.1229, 15.6926, -3.1214)
-antialiased = true
-
-[node name="Symbol" type="Polygon2D" parent="."]
-color = Color(0.025, 0.06, 0.09, 1)
-polygon = PackedVector2Array(-3, -10, 3, -10, 3, -3, 10, -3, 10, 3, 3, 3, 3, 10, -3, 10, -3, 3, -10, 3, -10, -3, -3, -3)
-antialiased = true
+[node name="Sprite" type="Sprite2D" parent="."]
+scale = Vector2(1.4, 1.4)
+texture = ExtResource("2_icon")
