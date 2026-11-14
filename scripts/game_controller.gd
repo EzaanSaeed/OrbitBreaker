@@ -36,6 +36,8 @@ enum GameState { RUNNING, GAME_OVER }
 @export var world: World
 @export var player: Spaceship
 @export var hud: HUD
+## Optional parallax background; purely visual.
+@export var background: Starfield
 
 var game_state: GameState = GameState.RUNNING
 var distance_score: float = 0.0
@@ -63,6 +65,8 @@ func _physics_process(delta: float) -> void:
 	if game_state != GameState.RUNNING:
 		return
 	world.update_world(delta, scroll_speed)
+	if background != null:
+		background.scroll(scroll_speed * delta)
 	world.remove_offscreen_objects()
 	if spawning_enabled:
 		world.update_spawning(delta, spawn_rate_scale)
