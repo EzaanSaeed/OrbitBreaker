@@ -30,6 +30,7 @@ var vertical_velocity: float = 0.0
 
 var gravity_acceleration: float = 0.0
 var boost_time_remaining: float = 0.0
+var fuel: ThrusterFuel
 var _fixed_x: float
 var _standalone: bool = false
 var _thrust_direction: float = 0.0
@@ -44,6 +45,12 @@ var _ship_base_color: Color = Color.CYAN
 
 
 func _ready() -> void:
+	fuel = get_node_or_null("ThrusterFuel") as ThrusterFuel
+	# Also support script-only Player instances used by the public contract tests.
+	if fuel == null:
+		fuel = ThrusterFuel.new()
+		fuel.name = "ThrusterFuel"
+		add_child(fuel)
 	# Older local Main scenes also draw a child polygon over the scripted ship.
 	_ship_visual = get_node_or_null("Ship") as Polygon2D
 	if _ship_visual != null:
@@ -176,8 +183,17 @@ func update_movement(delta: float) -> void:
 		return
 
 	# Integrate only the boosted portion if the timer expires during this tick.
-	var boosted_delta: float = minf(delta, boost_time_remaining)
-	var thrust_delta: float = delta + (thrust_multiplier - 1.0) * boosted_delta
+	var powered_delta: float = 0.0
+	if _thrust_direction != 0.0 and not fuel.is_empty():
+		powered_delta = delta
+		if fuel.drain_per_second > 0.0:
+			powered_delta = minf(delta, fuel.fuel / fuel.drain_per_second)
+		fuel.drain(powered_delta)
+		if not is_alive:
+			gravity_acceleration = 0.0
+			return
+	var boosted_delta: float = minf(powered_delta, boost_time_remaining)
+	var thrust_delta: float = powered_delta + (thrust_multiplier - 1.0) * boosted_delta
 	vertical_velocity = clampf(
 		vertical_velocity + _thrust_direction * thrust_power * thrust_delta + gravity_acceleration * delta,
 		-max_vertical_speed, max_vertical_speed
@@ -203,6 +219,12 @@ func apply_gravity(acceleration: float) -> void:
 	if is_alive and is_finite(acceleration):
 		gravity_acceleration += acceleration
 		assert(is_finite(gravity_acceleration), "Accumulated gravity must be finite.")
+
+
+func restore_fuel(amount: float) -> void:
+	assert(is_finite(amount) and amount >= 0.0, "Fuel refill must be finite and nonnegative.")
+	if is_alive and is_finite(amount) and amount > 0.0:
+		fuel.refill(amount)
 
 
 func apply_thrust_boost(multiplier: float, duration: float) -> void:
