@@ -11,3 +11,6 @@ script = ExtResource("1_3vyb7")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=110218366]
 shape = SubResource("CircleShape2D_player")
+
+[node name="Muzzle" type="Marker2D" parent="."]
+position = Vector2(22, 0)
