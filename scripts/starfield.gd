@@ -8,7 +8,8 @@ extends Node2D
 ## GameController calls scroll(distance) each physics step with the distance
 ## the world moved, so the stars speed up with the game and stop on game over.
 
-## Size of the area the stars wrap around in (the 960×540 viewport).
+## Size of the area the stars wrap around in. Grows to the real window size at
+## start, so wide browser windows have stars all the way to the right edge.
 @export var area: Vector2 = Vector2(960, 540)
 ## Fixed seed so the sky looks the same every run.
 @export var star_seed: int = 7
@@ -26,6 +27,9 @@ var _offsets: PackedFloat32Array = PackedFloat32Array()
 
 
 func _ready() -> void:
+	if not Engine.is_editor_hint() and is_inside_tree():
+		var visible_size := get_viewport_rect().size
+		area = Vector2(maxf(area.x, visible_size.x), maxf(area.y, visible_size.y))
 	var rng := RandomNumberGenerator.new()
 	rng.seed = star_seed
 	_stars.clear()
