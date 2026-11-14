@@ -106,7 +106,7 @@ Team is now three: **Developer C** owns `hud.gd`/`hud.tscn`, menus, VFX, sound a
 | HUD | C | `update_score(int)`, `update_health(int, int)`, `update_ammo(int)`, `update_fuel(float, float)`, `show_game_over(int)`, `restart_requested`. GameController pushes all values; the HUD never reads the Player |
 | Pickups | A (World) | `bullet_pickup_scene` slot; pickups every 6 s, equally health / fuel / ammo |
 
-**Provisional tuning:** fuel drain 5/s (20 s of continuous thrust), ThrusterBooster +50 fuel, pickup every 6 s. Fire rate and bullet speed: Developer B.
+**Tuning (tested 2026-11-14):** fuel drain 5/s (20 s of continuous thrust), ThrusterBooster +50 fuel, pickup every 6 s. Autopilot playtests with a player thrusting ~27% of the time: average fuel ~57%, first empty around 110-150 s (late game, at top speed). 6/s ran dry by ~60 s; 3/s never mattered; pickups every 8 s ran dry sooner. Fire rate (0.2 s) and bullet speed (720): Developer B.
 
 **Sequencing risks**
 - ThrusterBooster's refill change goes in **the same PR as Developer B's fuel hook**, together with updates to B's tests that still expect the 1.5× boost.

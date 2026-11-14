@@ -22,8 +22,8 @@ extends Node2D
 @export var spawn_interval: float = 3.0
 ## Seconds between asteroid spawn attempts. Tunable.
 @export var asteroid_spawn_interval: float = 1.5
-## Seconds between power-up spawn attempts. PROVISIONAL: 6 s, with three
-## pickup types sharing it equally (health / fuel / ammo).
+## Seconds between power-up spawn attempts, shared equally by the three pickup
+## types (health / fuel / ammo). Tuned with fuel: 8 s made fuel run dry sooner.
 @export var powerup_spawn_interval: float = 6.0
 
 @export_group("Spawn area")
