@@ -295,7 +295,7 @@ horizontal_alignment = 1
 [node name="Subtitle" type="Label" parent="Layout/GameOverPanel/Center/Card/Padding/Content" unique_id=1388822090]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.38, 0.8, 0.88, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 14
 text = "FINAL SCORE"
 horizontal_alignment = 1
 
@@ -307,11 +307,11 @@ text = "0"
 horizontal_alignment = 1
 
 [node name="RestartButton" type="Button" parent="Layout/GameOverPanel/Center/Card/Padding/Content" unique_id=1693941737]
-custom_minimum_size = Vector2(0, 48)
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 mouse_default_cursor_shape = 2
 theme_override_colors/font_color = Color(0.9, 1, 1, 1)
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 16
 theme_override_styles/normal = SubResource("ButtonNormal")
 theme_override_styles/pressed = SubResource("ButtonHover")
 theme_override_styles/hover = SubResource("ButtonHover")
@@ -319,11 +319,11 @@ theme_override_styles/focus = SubResource("ButtonFocus")
 text = "RESTART"
 
 [node name="MainMenuButton" type="Button" parent="Layout/GameOverPanel/Center/Card/Padding/Content"]
-custom_minimum_size = Vector2(0, 42)
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 mouse_default_cursor_shape = 2
 theme_override_colors/font_color = Color(0.85, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 16
 theme_override_styles/normal = SubResource("ButtonNormal")
 theme_override_styles/pressed = SubResource("ButtonHover")
 theme_override_styles/hover = SubResource("ButtonHover")

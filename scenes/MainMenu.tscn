@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/main_menu.gd" id="1_menu"]
 [ext_resource type="Script" path="res://scripts/starfield.gd" id="2_stars"]
+[ext_resource type="FontFile" uid="uid://02v1u7b15nix" path="res://assets/fonts/OrbitBreakerTitle.ttf" id="3_titlefont"]
 
 [sub_resource type="StyleBoxFlat" id="Card"]
 bg_color = Color(0.025, 0.055, 0.09, 0.99)
@@ -122,16 +123,10 @@ theme_override_constants/separation = 4
 
 [node name="Title" type="Label" parent="UI/Center/Card/Padding/Content/TitleBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.9, 0.98, 1, 1)
+theme_override_fonts/font = ExtResource("3_titlefont")
 theme_override_font_sizes/font_size = 40
+theme_override_colors/font_color = Color(0.9, 0.98, 1, 1)
 text = "ORBIT BREAKER"
-horizontal_alignment = 1
-
-[node name="Subtitle" type="Label" parent="UI/Center/Card/Padding/Content/TitleBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.38, 0.8, 0.88, 1)
-theme_override_font_sizes/font_size = 12
-text = "COSMIC FLIGHT & GRAVITATIONAL SURVIVAL"
 horizontal_alignment = 1
 
 [node name="Buttons" type="VBoxContainer" parent="UI/Center/Card/Padding/Content"]
@@ -139,11 +134,11 @@ layout_mode = 2
 theme_override_constants/separation = 10
 
 [node name="PlayButton" type="Button" parent="UI/Center/Card/Padding/Content/Buttons"]
-custom_minimum_size = Vector2(0, 46)
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 mouse_default_cursor_shape = 2
 theme_override_colors/font_color = Color(0.95, 1, 1, 1)
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 16
 theme_override_styles/normal = SubResource("ButtonNormal")
 theme_override_styles/pressed = SubResource("ButtonHover")
 theme_override_styles/hover = SubResource("ButtonHover")
@@ -151,23 +146,23 @@ theme_override_styles/focus = SubResource("ButtonFocus")
 text = "LAUNCH MISSION"
 
 [node name="ControlsButton" type="Button" parent="UI/Center/Card/Padding/Content/Buttons"]
-custom_minimum_size = Vector2(0, 40)
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 mouse_default_cursor_shape = 2
 theme_override_colors/font_color = Color(0.85, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 16
 theme_override_styles/normal = SubResource("ButtonNormal")
 theme_override_styles/pressed = SubResource("ButtonHover")
 theme_override_styles/hover = SubResource("ButtonHover")
 theme_override_styles/focus = SubResource("ButtonFocus")
-text = "FLIGHT MANUAL / CONTROLS"
+text = "INSTRUCTIONS"
 
 [node name="QuitButton" type="Button" parent="UI/Center/Card/Padding/Content/Buttons"]
-custom_minimum_size = Vector2(0, 36)
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 mouse_default_cursor_shape = 2
 theme_override_colors/font_color = Color(0.7, 0.85, 0.9, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 16
 theme_override_styles/normal = SubResource("ButtonNormal")
 theme_override_styles/pressed = SubResource("ButtonHover")
 theme_override_styles/hover = SubResource("ButtonHover")
@@ -177,7 +172,7 @@ text = "QUIT GAME"
 [node name="Footer" type="Label" parent="UI/Center/Card/Padding/Content"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.28, 0.52, 0.6, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 14
 text = "GAME JAM 2026 • THEME: COSMOS"
 horizontal_alignment = 1
 
@@ -227,7 +222,7 @@ theme_override_constants/separation = 16
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.98, 1, 1)
 theme_override_font_sizes/font_size = 24
-text = "FLIGHT MANUAL"
+text = "INSTRUCTIONS"
 horizontal_alignment = 1
 
 [node name="Instructions" type="GridContainer" parent="UI/ControlsOverlay/Center/Card/Padding/Content"]
@@ -239,84 +234,84 @@ columns = 2
 [node name="KeyThrustUp" type="Label" parent="UI/ControlsOverlay/Center/Card/Padding/Content/Instructions"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.38, 0.8, 0.88, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 14
 text = "W  /  UP ARROW"
 
 [node name="DescThrustUp" type="Label" parent="UI/ControlsOverlay/Center/Card/Padding/Content/Instructions"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.85, 0.96, 1, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 14
 text = "Thrust Up (consumes Fuel)"
 
 [node name="KeyThrustDown" type="Label" parent="UI/ControlsOverlay/Center/Card/Padding/Content/Instructions"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.38, 0.8, 0.88, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 14
 text = "S  /  DOWN ARROW"
 
 [node name="DescThrustDown" type="Label" parent="UI/ControlsOverlay/Center/Card/Padding/Content/Instructions"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.85, 0.96, 1, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 14
 text = "Thrust Down (consumes Fuel)"
 
 [node name="KeyShoot" type="Label" parent="UI/ControlsOverlay/Center/Card/Padding/Content/Instructions"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.38, 0.8, 0.88, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 14
 text = "SPACEBAR"
 
 [node name="DescShoot" type="Label" parent="UI/ControlsOverlay/Center/Card/Padding/Content/Instructions"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.85, 0.96, 1, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 14
 text = "Fire Blaster (consumes Ammo)"
 
 [node name="KeyPlanets" type="Label" parent="UI/ControlsOverlay/Center/Card/Padding/Content/Instructions"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.95, 0.35, 0.25, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 14
 text = "PLANETS"
 
 [node name="DescPlanets" type="Label" parent="UI/ControlsOverlay/Center/Card/Padding/Content/Instructions"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.85, 0.96, 1, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 14
 text = "Gravitational hazards (Instant death)"
 
 [node name="KeyAsteroids" type="Label" parent="UI/ControlsOverlay/Center/Card/Padding/Content/Instructions"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.95, 0.7, 0.25, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 14
 text = "ASTEROIDS"
 
 [node name="DescAsteroids" type="Label" parent="UI/ControlsOverlay/Center/Card/Padding/Content/Instructions"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.85, 0.96, 1, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 14
 text = "Impact deals 25 damage (Shoot to destroy: +10 Score)"
 
 [node name="KeyPickups" type="Label" parent="UI/ControlsOverlay/Center/Card/Padding/Content/Instructions"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.25, 0.95, 0.45, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 14
 text = "SUPPLY PODS"
 
 [node name="DescPickups" type="Label" parent="UI/ControlsOverlay/Center/Card/Padding/Content/Instructions"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.85, 0.96, 1, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 14
 text = "Green: Hull (+25)  •  Orange: Fuel Pod"
 
 [node name="Hint" type="Label" parent="UI/ControlsOverlay/Center/Card/Padding/Content"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.38, 0.8, 0.88, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 14
 text = "Fight planetary gravity, manage your thruster fuel, and survive!"
 horizontal_alignment = 1
 
 [node name="CloseButton" type="Button" parent="UI/ControlsOverlay/Center/Card/Padding/Content"]
-custom_minimum_size = Vector2(0, 42)
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 mouse_default_cursor_shape = 2
 theme_override_colors/font_color = Color(0.9, 1, 1, 1)
