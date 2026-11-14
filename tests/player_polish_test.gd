@@ -147,7 +147,6 @@ func _run() -> void:
 	player.validate_state()
 	print("PASS rapid health animation; orange pickup pulse on ThrusterBooster")
 
-	player.apply_thrust_boost(1.5, 5.0)
 	var planet := main.world.spawn_planet()
 	assert(planet != null)
 	planet.position = player.position

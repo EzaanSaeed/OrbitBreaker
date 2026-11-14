@@ -90,8 +90,6 @@ func _run() -> void:
 	player.apply_thrust(0.0)
 	player.update_movement(0.1)
 	assert(is_equal_approx(player.vertical_velocity, -20.0))
-	player.apply_thrust_boost(1.0, 1.0)
-	assert(player.thrust_multiplier == 1.0 and player.boost_time_remaining == 1.0)
 	# Shared typed pickup APIs accept our Spaceship without adapters.
 	var heal = load("res://scripts/health_booster.gd").new()
 	heal.apply_effect(player)
@@ -101,9 +99,9 @@ func _run() -> void:
 	player.fuel.drain(14.0)                       # 5/s for 14 s -> 30 fuel left
 	var boost = load("res://scripts/thruster_booster.gd").new()
 	boost.apply_effect(player)
-	assert(is_equal_approx(player.fuel.fuel, 80.0) and player.thrust_multiplier == 1.0)
+	assert(is_equal_approx(player.fuel.fuel, 80.0))
 	boost.free()
-	print("PASS public contract methods, boost timer and typed power-up interoperability")
+	print("PASS public contract methods, fuel refill and typed power-up interoperability")
 
 	assert(player.health == player.max_health and player.health == 100)
 	player.take_damage(25)
@@ -125,16 +123,14 @@ func _run() -> void:
 	player.die()
 	player.take_damage(25)
 	player.restore_health(100)
-	player.apply_thrust_boost(2.0, 1.0)
 	assert(player.health == 0 and deaths == 1)
-	assert(player.thrust_multiplier == 1.0 and player.boost_time_remaining == 0.0)
 	assert(not player.is_physics_processing())
 	assert(changes == [[100, 100], [75, 100], [95, 100], [100, 100], [0, 100]])
 	player.validate_state()
 	await process_frame
 	assert(player.get_node("CollisionShape2D").disabled)
 	player.queue_free()
-	print("PASS health, clamping, one death signal, boost/movement/collision cleanup")
+	print("PASS health, clamping, one death signal, movement/collision cleanup")
 
 	var producer := GravityProducer.new()
 	producer.process_physics_priority = -1

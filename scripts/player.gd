@@ -22,14 +22,12 @@ var _is_firing: bool = false
 @export var thrust_power: float = 600.0
 @export var max_vertical_speed: float = 300.0
 @export var max_health: int = 100
-var thrust_multiplier: float = 1.0
 
 var health: int = 100
 var is_alive: bool = true
 var vertical_velocity: float = 0.0
 
 var gravity_acceleration: float = 0.0
-var boost_time_remaining: float = 0.0
 var fuel: ThrusterFuel
 var _fixed_x: float
 var _standalone: bool = false
@@ -182,7 +180,7 @@ func update_movement(delta: float) -> void:
 		gravity_acceleration = 0.0
 		return
 
-	# Integrate only the boosted portion if the timer expires during this tick.
+	# Accelerate only for the portion of this tick covered by remaining fuel.
 	var powered_delta: float = 0.0
 	if _thrust_direction != 0.0 and not fuel.is_empty():
 		powered_delta = delta
@@ -192,15 +190,10 @@ func update_movement(delta: float) -> void:
 		if not is_alive:
 			gravity_acceleration = 0.0
 			return
-	var boosted_delta: float = minf(powered_delta, boost_time_remaining)
-	var thrust_delta: float = powered_delta + (thrust_multiplier - 1.0) * boosted_delta
 	vertical_velocity = clampf(
-		vertical_velocity + _thrust_direction * thrust_power * thrust_delta + gravity_acceleration * delta,
+		vertical_velocity + _thrust_direction * thrust_power * powered_delta + gravity_acceleration * delta,
 		-max_vertical_speed, max_vertical_speed
 	)
-	boost_time_remaining = maxf(0.0, boost_time_remaining - delta)
-	if boost_time_remaining == 0.0:
-		thrust_multiplier = 1.0
 	gravity_acceleration = 0.0
 	position = Vector2(_fixed_x, position.y + vertical_velocity * delta)
 
@@ -225,22 +218,6 @@ func restore_fuel(amount: float) -> void:
 	assert(is_finite(amount) and amount >= 0.0, "Fuel refill must be finite and nonnegative.")
 	if is_alive and is_finite(amount) and amount > 0.0:
 		fuel.refill(amount)
-
-
-func apply_thrust_boost(multiplier: float, duration: float) -> void:
-	assert(is_finite(multiplier) and multiplier >= 1.0,
-		"Boost multiplier must be finite and at least one.")
-	assert(is_finite(duration) and duration > 0.0,
-		"Boost duration must be finite and positive.")
-	# Assertions are disabled in release builds; reject invalid input there too.
-	if not is_finite(multiplier) or multiplier < 1.0:
-		return
-	if not is_finite(duration) or duration <= 0.0 or not is_alive:
-		return
-	thrust_multiplier = multiplier
-	boost_time_remaining = duration
-	_assert_configuration()
-	_assert_state()
 
 
 func take_damage(amount: int) -> void:
@@ -274,8 +251,6 @@ func die() -> void:
 	vertical_velocity = 0.0
 	_thrust_direction = 0.0
 	gravity_acceleration = 0.0
-	boost_time_remaining = 0.0
-	thrust_multiplier = 1.0
 	_damage_flash_remaining = 0.0
 	_pickup_pulse_remaining = 0.0
 	set_process(false)
@@ -296,16 +271,9 @@ func _assert_configuration() -> void:
 	assert(is_finite(thrust_power) and thrust_power >= 0.0,
 		"Thrust power must be finite and nonnegative.")
 
-	assert(is_finite(thrust_multiplier) and thrust_multiplier >= 1.0,
-		"Thrust multiplier must be finite and at least one.")
-
 
 func _assert_state() -> void:
 	assert(ammo >= 0, "Ammunition cannot be negative.")
-	assert(is_finite(boost_time_remaining) and boost_time_remaining >= 0.0,
-		"Boost time must be finite and nonnegative.")
-	assert(is_alive or (boost_time_remaining == 0.0 and thrust_multiplier == 1.0),
-		"Dead players cannot retain a boost.")
 	assert(health >= 0 and health <= max_health, "Health is outside its bounds.")
 	assert(health != 0 or not is_alive, "A player with zero health must be dead.")
 	assert(is_finite(vertical_velocity), "Velocity must be finite.")
