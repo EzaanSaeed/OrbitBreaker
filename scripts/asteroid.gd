@@ -19,7 +19,7 @@ extends Area2D
 		_build_outline()
 ## Health scale is 0–100 (Spaceship.max_health), so 25 = four hits to die.
 @export var collision_damage: int = 25
-## Placeholder look until real art exists.
+## Fallback look if no meteor texture is available.
 @export var color: Color = Color(0.55, 0.52, 0.48):
 	set(value):
 		color = value
@@ -31,8 +31,24 @@ extends Area2D
 ## single collision must not inflict repeated damage".)
 var is_active: bool = true
 
+## Kenney "Space Shooter Remastered" meteors (CC0, assets/kenney/LICENSE-kenney.txt).
+const TEXTURES: Array[Texture2D] = [
+	preload("res://assets/kenney/meteors/meteorGrey_big1.png"),
+	preload("res://assets/kenney/meteors/meteorGrey_big2.png"),
+	preload("res://assets/kenney/meteors/meteorGrey_big3.png"),
+	preload("res://assets/kenney/meteors/meteorGrey_big4.png"),
+	preload("res://assets/kenney/meteors/meteorBrown_big1.png"),
+	preload("res://assets/kenney/meteors/meteorBrown_big2.png"),
+	preload("res://assets/kenney/meteors/meteorBrown_big3.png"),
+	preload("res://assets/kenney/meteors/meteorBrown_big4.png"),
+]
+## The sprite is drawn this much wider than the hitbox, so the rock's edge
+## lines up with where collisions actually happen (meteor art isn't round).
+const VISUAL_SCALE: float = 1.15
+
 var _outline: PackedVector2Array = PackedVector2Array()
 var _spin: float = 0.0
+var _texture: Texture2D = TEXTURES.pick_random()
 
 @onready var _collision_shape: CollisionShape2D = $CollisionShape2D
 
@@ -56,7 +72,11 @@ func _physics_process(delta: float) -> void:
 
 
 func _draw() -> void:
-	if _outline.size() >= 3:
+	if _texture != null:
+		var size := _texture.get_size()
+		var fit := radius * 2.0 * VISUAL_SCALE / maxf(size.x, size.y)
+		draw_texture_rect(_texture, Rect2(-size * fit / 2.0, size * fit), false)
+	elif _outline.size() >= 3:
 		draw_colored_polygon(_outline, color)
 
 
@@ -73,6 +93,12 @@ func deactivate() -> void:
 	set_deferred("monitoring", false)
 	set_deferred("monitorable", false)
 	hide()
+	# Visual only: a short burst where the asteroid was (shot or rammed).
+	if not Engine.is_editor_hint() and is_inside_tree() and get_parent() != null:
+		var burst := AsteroidBurst.new()
+		burst.position = position
+		burst.size = radius
+		get_parent().add_child.call_deferred(burst)
 
 
 ## Scroll with the world.
