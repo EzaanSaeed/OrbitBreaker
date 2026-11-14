@@ -28,9 +28,11 @@ As you progress, the game becomes increasingly challenging.
 
 ```text
 OrbitBreaker/
-├── scenes/       # main.tscn (startup), planet.tscn
+├── scenes/       # MainMenu.tscn (startup), main.tscn (game), player, planet, HUD, pickups
 ├── scripts/      # one script per game object (player, planet, world, HUD, ...)
-├── assets/       # fonts, Kenney art, audio
+├── assets/       # fonts and Kenney art
+├── audio/        # music and sound effects
+├── tests/        # headless test suites
 └── project.godot
 ```
 
