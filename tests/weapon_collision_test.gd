@@ -95,12 +95,12 @@ func _run() -> void:
 		var pickup = load("res://scenes/%s.tscn" % kind).instantiate()
 		pickup.position = Vector2(500, 420)
 		main.world.add_child(pickup)
-		var before := [player.health, player.ammo, player.thrust_multiplier, player.boost_time_remaining]
+		var before := [player.health, player.ammo, player.fuel.fuel]
 		bullet = _bullet(pickup.position)
 		await _frames()
 		assert(is_instance_valid(bullet) and not bullet._spent)
 		assert(not pickup.is_collected and pickup.visible and pickup.monitorable and pickup.monitoring)
-		assert(before == [player.health, player.ammo, player.thrust_multiplier, player.boost_time_remaining])
+		assert(before == [player.health, player.ammo, player.fuel.fuel])
 		assert(kills.size() == 3)
 		bullet.queue_free()
 		pickup.queue_free()

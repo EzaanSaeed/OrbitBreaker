@@ -1,90 +1,45 @@
 extends SceneTree
+## Historical suite name retained: fuel pickups must never boost acceleration.
 ## Run: Godot --headless --path . --script res://tests/player_boost_test.gd
-## Add -- --invalid to exercise precondition rejection (expected assertion errors).
 
 func _initialize() -> void:
 	create_timer(10.0).timeout.connect(func(): quit(1))
 	call_deferred("_run")
 
-func _key(pressed: bool) -> void:
-	var event := InputEventKey.new()
-	event.physical_keycode = KEY_S
-	event.pressed = pressed
-	Input.parse_input_event(event)
-	Input.flush_buffered_events()
-
-func _check(player) -> void:
-	player._assert_configuration()
-	player._assert_state()
-	assert(player.thrust_multiplier >= 1.0)
-	assert(player.max_vertical_speed == 300.0)
-
 func _run() -> void:
 	var player = load("res://scenes/player.tscn").instantiate()
 	root.add_child(player)
 	player.set_physics_process(false)
-	player.apply_thrust_boost(2.0, 0.25)
-	assert(player.thrust_multiplier == 2.0)
-	assert(player.boost_time_remaining == 0.25)
-	_key(true)
-	player._physics_process(0.1)
-	assert(is_equal_approx(player.vertical_velocity, 120.0))
-	assert(is_equal_approx(player.boost_time_remaining, 0.15))
-	_check(player)
-	print("PASS activation and delta countdown")
-
-	player.vertical_velocity = 0.0
-	player._physics_process(0.2)
-	assert(is_equal_approx(player.vertical_velocity, 210.0))
-	assert(player.thrust_multiplier == 1.0 and player.boost_time_remaining == 0.0)
-	player.vertical_velocity = 0.0
-	player._physics_process(0.1)
+	assert(not player.has_method("apply_thrust_boost"))
+	for property in player.get_property_list():
+		assert(property.name not in ["thrust_multiplier", "boost_time_remaining"])
+	var pickup = load("res://scripts/thruster_booster.gd").new()
+	player.fuel.drain(14.0)
+	assert(player.fuel.fuel == 30.0)
+	pickup.apply_effect(player)
+	assert(player.fuel.fuel == 80.0)
+	player.apply_thrust(1.0)
+	player.update_movement(0.1)
 	assert(is_equal_approx(player.vertical_velocity, 60.0))
-	_check(player)
-	print("PASS partial-frame expiration and normal thrust restoration")
-
-	player.apply_thrust_boost(2.0, 1.0)
-	player._physics_process(0.25)
-	player.apply_thrust_boost(3.0, 2.0)
-	assert(player.thrust_multiplier == 3.0)
-	assert(player.boost_time_remaining == 2.0)
-	player.apply_thrust_boost(3.0, 2.0)
-	assert(player.thrust_multiplier == 3.0 and player.boost_time_remaining == 2.0)
-	_check(player)
-	print("PASS repeated pickups replace multiplier and refresh duration without stacking")
-
-	_key(false)
+	pickup.apply_effect(player)
+	assert(player.fuel.fuel == 100.0)
 	player.vertical_velocity = 0.0
 	player.apply_gravity(100.0)
-	player._physics_process(0.1)
-	assert(is_equal_approx(player.vertical_velocity, 10.0))
-	_key(true)
-	player.vertical_velocity = 0.0
-	player.apply_gravity(100.0)
-	player._physics_process(0.1)
-	assert(is_equal_approx(player.vertical_velocity, 190.0))
-	player._physics_process(0.5)
+	player.update_movement(0.1)
+	assert(is_equal_approx(player.vertical_velocity, 70.0))
+	player.update_movement(1.0)
 	assert(player.vertical_velocity == 300.0)
-	_key(false)
-	_check(player)
-	print("PASS independent gravity and unchanged speed cap")
-
-	if "--invalid" in OS.get_cmdline_user_args():
-		for args in [[0.0, 1.0], [-2.0, 1.0], [INF, 1.0], [NAN, 1.0], [2.0, 0.0], [2.0, -1.0], [2.0, INF], [2.0, NAN]]:
-			var before_multiplier: float = player.thrust_multiplier
-			var before_time: float = player.boost_time_remaining
-			player.apply_thrust_boost(args[0], args[1])
-			assert(player.thrust_multiplier == before_multiplier)
-			assert(player.boost_time_remaining == before_time)
-			_check(player)
-		print("PASS invalid inputs rejected without changing active boost (expected assertion errors above)")
-
-	player.take_damage(100)
-	assert(not player.is_alive)
-	assert(player.thrust_multiplier == 1.0 and player.boost_time_remaining == 0.0)
-	player.apply_thrust_boost(2.0, 10.0)
-	assert(player.thrust_multiplier == 1.0 and player.boost_time_remaining == 0.0)
-	_check(player)
-	print("PASS death cleanup and post-death boost rejection")
+	print("PASS removed legacy APIs; repeated fuel pickups preserve normal acceleration, gravity and speed cap")
+	player.fuel.drain(1000.0)
+	player.vertical_velocity = 60.0
+	player.apply_gravity(100.0)
+	player.update_movement(0.1)
+	assert(player.vertical_velocity == 70.0)
+	player.die()
+	pickup.apply_effect(player)
+	assert(player.fuel.fuel == 0.0)
+	player.validate_state()
+	print("PASS empty fuel preserves momentum/gravity; dead Player rejects refill")
+	pickup.free()
 	player.queue_free()
 	quit()

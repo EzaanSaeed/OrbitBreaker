@@ -54,17 +54,15 @@ func _run() -> void:
 	var player = _player(fixture)
 	var deaths: Array = []
 	player.player_died.connect(func(): deaths.append(true))
-	player.apply_thrust_boost(1.5, 5.0)
 	var planet = load("res://scenes/planet.tscn").instantiate()
 	fixture.add_child(planet)
 	await _settle()
 	assert(not player.is_alive and player.health == 0 and deaths.size() == 1)
-	assert(player.boost_time_remaining == 0.0 and player.thrust_multiplier == 1.0)
 	assert(player.get_node("CollisionShape2D").disabled)
 	player.area_entered.emit(planet)
 	assert(deaths.size() == 1)
 	player.validate_state()
-	print("PASS real planet overlap kills full-health Player once and clears boost")
+	print("PASS real planet overlap kills full-health Player once")
 
 	# Simulate callbacks queued before death; none may consume another object.
 	var ignored_asteroid = load("res://scenes/asteroid.tscn").instantiate()
@@ -150,7 +148,7 @@ func _run() -> void:
 	await _settle()
 	assert(boost.is_collected and is_equal_approx(player.fuel.fuel, 80.0))
 	player.area_entered.emit(boost)
-	assert(is_equal_approx(player.fuel.fuel, 80.0) and player.thrust_multiplier == 1.0)
+	assert(is_equal_approx(player.fuel.fuel, 80.0))
 	var unrelated := Area2D.new()
 	fixture.add_child(unrelated)
 	player.area_entered.emit(unrelated)

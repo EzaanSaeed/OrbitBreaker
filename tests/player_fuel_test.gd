@@ -1,8 +1,7 @@
 extends SceneTree
 ## Godot --headless --path . --fixed-fps 60 --script res://tests/player_fuel_test.gd
 
-## ThrusterBooster now refills fuel (Developer A); pass --legacy-boost to test the old 1.5x boost.
-var fuel_pickup_integration := not ("--legacy-boost" in OS.get_cmdline_user_args())
+## Uses the merged +50 fuel ThrusterBooster contract.
 
 func _initialize() -> void:
 	create_timer(180.0).timeout.connect(func(): quit(1))
@@ -61,7 +60,6 @@ func _run() -> void:
 	player.apply_gravity(100)
 	player._physics_process(0.1)
 	assert(player.vertical_velocity == 70 and player.gravity_acceleration == 0)
-	player.apply_thrust_boost(1.5, 5)
 	player._physics_process(0.1)
 	assert(player.vertical_velocity == 70)
 	_key(KEY_SPACE, true)
@@ -69,7 +67,6 @@ func _run() -> void:
 	_key(KEY_SPACE, false)
 	assert(player.ammo == 14)
 	# Only the fuel-powered portion accelerates on the final depletion tick.
-	player.apply_thrust_boost(1, 0.1)
 	player.restore_fuel(0.25)
 	player.vertical_velocity = 0
 	player.apply_gravity(100)
@@ -85,8 +82,6 @@ func _run() -> void:
 	player._physics_process(0.5)
 	assert(player.fuel.fuel == 95)
 	_key(KEY_S, false)
-	if not fuel_pickup_integration:
-		player.restore_fuel(50)
 	var capped_pickup = load("res://scenes/thruster_booster.tscn").instantiate()
 	capped_pickup.position = player.position
 	fixture.add_child(capped_pickup)
@@ -100,7 +95,7 @@ func _run() -> void:
 	assert(player.fuel.fuel == 100 and player.ammo == 14 and player.health == 0)
 	fixture.queue_free()
 	await process_frame
-	print("PASS empty fuel blocks thrust/legacy boost but preserves momentum, gravity and shooting; partial depletion and death")
+	print("PASS empty fuel blocks thrust but preserves momentum, gravity and shooting; partial depletion and death")
 
 	# Actual Main, unchanged World/Main/GameController and natural pickup timers.
 	var main: GameController = load("res://scenes/main.tscn").instantiate()
@@ -123,12 +118,7 @@ func _run() -> void:
 			assert(player.health == mini(100, previous[0] + 25))
 			seen["health"] = true
 		elif area is ThrusterBooster:
-			if fuel_pickup_integration:
-				assert(is_equal_approx(player.fuel.fuel, minf(100, previous[1] + 50)))
-				assert(player.thrust_multiplier == 1 and player.boost_time_remaining == 0)
-			else:
-				assert(is_equal_approx(player.fuel.fuel, previous[1]))
-				assert(player.thrust_multiplier == 1.5 and player.boost_time_remaining > 0)
+			assert(is_equal_approx(player.fuel.fuel, minf(100, previous[1] + 50)))
 			seen["fuel"] = true
 		elif area is BulletPickup:
 			assert(player.ammo == previous[2] + 15)
@@ -158,7 +148,7 @@ func _run() -> void:
 		player.vertical_velocity = 0
 	assert(seen.size() == 3)
 	assert(main.get_display_score() > 0)
-	print("PASS actual Main: natural physics pickups (+25 HP, +15 ammo); thruster mode: ", "integrated +50 fuel" if fuel_pickup_integration else "legacy boost; Developer A refill hook pending")
+	print("PASS actual Main: natural physics pickups (+25 HP, +50 fuel capped, +15 ammo)")
 	player.die()
 	var stopped_fuel := player.fuel.fuel
 	var stopped_ammo := player.ammo
