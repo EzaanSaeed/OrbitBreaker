@@ -24,9 +24,20 @@ var _fixed_x: float
 var _standalone: bool = false
 var _thrust_direction: float = 0.0
 var _processing_asteroids: Array[Asteroid] = []
+const _DAMAGE_FLASH_DURATION: float = 0.15
+const _PICKUP_PULSE_DURATION: float = 0.4
+var _damage_flash_remaining: float = 0.0
+var _pickup_pulse_remaining: float = 0.0
+var _pickup_pulse_color: Color = Color.GREEN
+var _ship_visual: Polygon2D
+var _ship_base_color: Color = Color.CYAN
 
 
 func _ready() -> void:
+	# Older local Main scenes also draw a child polygon over the scripted ship.
+	_ship_visual = get_node_or_null("Ship") as Polygon2D
+	if _ship_visual != null:
+		_ship_base_color = _ship_visual.color
 	_assert_configuration()
 	_ensure_input_actions()
 	health = max_health
@@ -39,14 +50,31 @@ func _ready() -> void:
 	if not area_entered.is_connected(_on_area_entered):
 		area_entered.connect(_on_area_entered)
 	health_changed.emit(health, max_health)
+	set_process(false)
 	queue_redraw()
 
 
 func _draw() -> void:
+	if is_instance_valid(_ship_visual):
+		_ship_visual.color = _ship_base_color.lerp(
+			Color(1.0, 0.15, 0.15), _damage_flash_remaining / _DAMAGE_FLASH_DURATION)
 	draw_colored_polygon(
 		PackedVector2Array([Vector2(16, 0), Vector2(-10, -10), Vector2(-10, 10)]),
-		Color.CYAN
+		Color.CYAN.lerp(Color(1.0, 0.15, 0.15), _damage_flash_remaining / _DAMAGE_FLASH_DURATION)
 	)
+	if _pickup_pulse_remaining > 0.0:
+		var progress := 1.0 - _pickup_pulse_remaining / _PICKUP_PULSE_DURATION
+		var color := _pickup_pulse_color
+		color.a = 1.0 - progress
+		draw_arc(Vector2.ZERO, lerpf(18.0, 36.0, progress), 0.0, TAU, 24, color, 2.0, true)
+
+
+func _process(delta: float) -> void:
+	_damage_flash_remaining = maxf(0.0, _damage_flash_remaining - delta)
+	_pickup_pulse_remaining = maxf(0.0, _pickup_pulse_remaining - delta)
+	queue_redraw()
+	if _damage_flash_remaining == 0.0 and _pickup_pulse_remaining == 0.0:
+		set_process(false)
 
 
 func _physics_process(delta: float) -> void:
@@ -155,6 +183,9 @@ func die() -> void:
 	gravity_acceleration = 0.0
 	boost_time_remaining = 0.0
 	thrust_multiplier = 1.0
+	_damage_flash_remaining = 0.0
+	_pickup_pulse_remaining = 0.0
+	set_process(false)
 	set_physics_process(false)
 	# Deferred because damage may be delivered from a physics callback.
 	$CollisionShape2D.set_deferred("disabled", true)
@@ -221,10 +252,21 @@ func _on_area_entered(area: Area2D) -> void:
 		# health_changed/player_died listeners may synchronously trigger another
 		# callback before deactivate() runs. Guard that reentrant interval too.
 		_processing_asteroids.append(area)
+		if area.get_collision_damage() > 0:
+			_damage_flash_remaining = _DAMAGE_FLASH_DURATION
+			set_process(true)
+			queue_redraw()
 		take_damage(area.get_collision_damage())
 		if is_instance_valid(area):
 			area.deactivate()
 		_processing_asteroids.erase(area)
 	elif area is PowerUp and not area.is_collected:
 		# collect() marks the pickup collected before applying its effect.
+		var is_health_pickup := area is HealthBooster
+		var is_thruster_pickup := area is ThrusterBooster
 		area.collect(self)
+		if is_alive and (is_health_pickup or is_thruster_pickup):
+			_pickup_pulse_color = Color(0.15, 1.0, 0.3) if is_health_pickup else Color(1.0, 0.65, 0.05)
+			_pickup_pulse_remaining = _PICKUP_PULSE_DURATION
+			set_process(true)
+			queue_redraw()
