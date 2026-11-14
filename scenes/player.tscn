@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://chwteiu1ea47r"]
 
 [ext_resource type="Script" uid="uid://by0affbomwukq" path="res://scripts/player.gd" id="1_3vyb7"]
+[ext_resource type="Script" path="res://scripts/thruster_fuel.gd" id="2_fuel"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_player"]
 radius = 12.0
@@ -14,3 +15,6 @@ shape = SubResource("CircleShape2D_player")
 
 [node name="Muzzle" type="Marker2D" parent="."]
 position = Vector2(22, 0)
+
+[node name="ThrusterFuel" type="Node" parent="."]
+script = ExtResource("2_fuel")
