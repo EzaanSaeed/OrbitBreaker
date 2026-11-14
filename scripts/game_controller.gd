@@ -26,18 +26,15 @@ enum GameState { RUNNING, GAME_OVER }
 ## Turn off to test against hand-placed planets only.
 @export var spawning_enabled: bool = true
 
-## Wired in main.tscn. player and hud may be null until Developer B's scenes land.
+## Wired in main.tscn.
 @export var world: World
 @export var player: Spaceship
 @export var hud: HUD
-## TEMPORARY: on-screen readout for testing until the HUD exists. Delete with the node.
-@export var debug_label: Label
 
 var game_state: GameState = GameState.RUNNING
 var distance_score: float = 0.0
 var scroll_speed: float = 0.0
 
-var _last_gravity: float = 0.0
 
 
 func _ready() -> void:
@@ -62,23 +59,12 @@ func _physics_process(delta: float) -> void:
 	if spawning_enabled:
 		world.update_spawning(delta)
 	if player != null and player.is_alive:
-		_last_gravity = world.get_total_gravity_at(player.global_position)
-		player.apply_gravity(_last_gravity)
+		player.apply_gravity(world.get_total_gravity_at(player.global_position))
 	update_score(delta)
 	update_difficulty(delta)
 	check_boundaries()
 	if hud != null:
 		hud.update_score(get_display_score())
-	_update_debug_label()
-	# Collision handling (planet/asteroid/power-up) is still to be agreed — see docs/domain-model.md.
-
-
-func _update_debug_label() -> void:
-	if debug_label == null:
-		return
-	debug_label.text = "score %d   speed %.0f   planets %d   asteroids %d   power-ups %d   gravity on ship %+.1f px/s²" % [
-		get_display_score(), scroll_speed, world.active_planets.size(),
-		world.active_asteroids.size(), world.active_powerups.size(), _last_gravity]
 
 
 ## Advance distance. Has no effect once the run is over.
