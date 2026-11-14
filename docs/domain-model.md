@@ -60,6 +60,10 @@ These were needed to make V3 implementable. None changes gameplay.
 
 960×540 viewport, `scenes/main.tscn` as the startup scene, dark background colour, and the two input actions.
 
+## Startup
+
+The game starts on `scenes/MainMenu.tscn` (Developer C: Play / Instructions / Quit, hidden on web; title in Orbitron weight 800). Play loads `main.tscn`; the game-over panel's RETURN TO MENU goes back.
+
 ## Main scene
 
 ```
