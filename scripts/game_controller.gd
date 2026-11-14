@@ -40,11 +40,16 @@ enum GameState { RUNNING, GAME_OVER }
 @export var background: Starfield
 
 var game_state: GameState = GameState.RUNNING
+## Pixels travelled. Drives difficulty, so bonus points are kept separately.
 var distance_score: float = 0.0
+## Points from shooting asteroids (Developer B's weapon reports each kill).
+var bonus_score: int = 0
 var scroll_speed: float = 0.0
 ## 1.0 until top speed is reached, then rises towards max_spawn_rate_scale.
 var spawn_rate_scale: float = 1.0
 
+## Instance ids of asteroids that already earned a bonus this run (never twice).
+var _bonus_awarded: Dictionary = {}
 
 
 func _ready() -> void:
@@ -59,6 +64,7 @@ func _ready() -> void:
 			player.health_changed.connect(hud.update_health)
 	if hud != null:
 		hud.restart_requested.connect(restart_game)
+	_connect_weapon_and_fuel()
 
 
 func _physics_process(delta: float) -> void:
@@ -128,13 +134,47 @@ func restart_game() -> void:
 	get_tree().reload_current_scene()
 
 
-## Score shown to the player (whole number, scaled from pixels).
+## Score shown to the player: distance points plus asteroid-shooting bonuses.
 func get_display_score() -> int:
-	return int(distance_score * score_scale)
+	return int(distance_score * score_scale) + bonus_score
+
+
+## Receives Spaceship.asteroid_destroyed(asteroid, score_bonus) from Developer B's
+## weapon. Adds the bonus at most once per asteroid, and only while the run is
+## active, so the score stays frozen after game over.
+func award_asteroid_bonus(asteroid: Node, score_bonus: int) -> void:
+	if game_state != GameState.RUNNING or score_bonus <= 0:
+		return
+	if asteroid != null:
+		var id := asteroid.get_instance_id()
+		if _bonus_awarded.has(id):
+			return
+		_bonus_awarded[id] = true
+	bonus_score += score_bonus
+	if hud != null:
+		hud.update_score(get_display_score())
+
+
+## Hook up the weapon (kill bonuses, ammo display) and the fuel display.
+## The HUD parts switch on once Developer C's HUD has update_ammo/update_fuel,
+## and fuel once Developer B's Player has its ThrusterFuel node.
+func _connect_weapon_and_fuel() -> void:
+	if player == null:
+		return
+	player.asteroid_destroyed.connect(award_asteroid_bonus)
+	if hud != null and hud.has_method("update_ammo"):
+		player.ammo_changed.connect(Callable(hud, "update_ammo"))
+		# The Player emitted its starting ammo before we connected; send it now.
+		hud.call("update_ammo", player.ammo)
+	var fuel := player.get("fuel") as ThrusterFuel
+	if fuel != null and hud != null and hud.has_method("update_fuel"):
+		fuel.fuel_changed.connect(Callable(hud, "update_fuel"))
+		hud.call("update_fuel", fuel.fuel, fuel.max_fuel)
 
 
 func validate_state() -> void:
 	assert(distance_score >= 0.0)
+	assert(bonus_score >= 0)
 	assert(scroll_speed > 0.0)
 	assert(initial_scroll_speed > 0.0 and initial_scroll_speed <= max_scroll_speed)
 	assert(play_area_top < play_area_bottom)
