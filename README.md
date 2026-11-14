@@ -29,8 +29,8 @@ As you progress, the game becomes increasingly challenging.
 ```text
 OrbitBreaker/
 ├── scenes/       # main.tscn (startup), planet.tscn
-├── scripts/      # one script per domain class (see docs/domain-model.md)
-├── docs/         # domain model, decisions and open questions
+├── scripts/      # one script per game object (player, planet, world, HUD, ...)
+├── assets/       # fonts, Kenney art, audio
 └── project.godot
 ```
 
