@@ -70,6 +70,12 @@ func _ready() -> void:
 	_assert_state()
 	if not area_entered.is_connected(_on_area_entered):
 		area_entered.connect(_on_area_entered)
+	var audio_manager := get_node_or_null("/root/AudioManager")
+	if audio_manager != null:
+		if not player_died.is_connected(audio_manager.on_player_died):
+			player_died.connect(audio_manager.on_player_died)
+		if not asteroid_destroyed.is_connected(audio_manager.on_asteroid_destroyed):
+			asteroid_destroyed.connect(audio_manager.on_asteroid_destroyed)
 	health_changed.emit(health, max_health)
 	ammo_changed.emit(ammo)
 	set_process(false)
@@ -104,6 +110,10 @@ func _physics_process(delta: float) -> void:
 	apply_thrust(Input.get_axis("thrust_up", "thrust_down"))
 	update_movement(delta)
 	_update_weapon(delta)
+	var audio_manager := get_node_or_null("/root/AudioManager")
+	if audio_manager != null and audio_manager.has_method("set_thruster_active"):
+		audio_manager.set_thruster_active(
+			is_alive and _thrust_direction != 0.0 and not fuel.is_empty())
 
 
 func _update_weapon(delta: float) -> void:
@@ -147,6 +157,10 @@ func try_shoot() -> Bullet:
 	_shot_cooldown = shot_interval
 	ammo_changed.emit(ammo)
 	_is_firing = false
+	# Audio is optional; a missing AudioManager or unregistered clip is silent.
+	var audio_manager := get_node_or_null("/root/AudioManager")
+	if audio_manager != null and audio_manager.has_method("play_laser"):
+		audio_manager.play_laser()
 	return bullet
 
 
@@ -230,6 +244,9 @@ func take_damage(amount: int) -> void:
 	if not is_alive or amount <= 0:
 		return
 	health = maxi(0, health - amount)
+	var audio_manager := get_node_or_null("/root/AudioManager")
+	if audio_manager != null and audio_manager.has_method("on_player_damage"):
+		audio_manager.on_player_damage()
 	if health == 0:
 		die()
 	else:
@@ -251,6 +268,9 @@ func restore_health(amount: int) -> void:
 func die() -> void:
 	if not is_alive:
 		return
+	var audio_manager := get_node_or_null("/root/AudioManager")
+	if audio_manager != null and audio_manager.has_method("set_thruster_active"):
+		audio_manager.set_thruster_active(false)
 	health = 0
 	is_alive = false
 	vertical_velocity = 0.0
@@ -334,6 +354,14 @@ func _on_area_entered(area: Area2D) -> void:
 		var is_health_pickup := area is HealthBooster
 		var is_thruster_pickup := area is ThrusterBooster
 		area.collect(self)
+		var audio_manager := get_node_or_null("/root/AudioManager")
+		if audio_manager != null:
+			if is_health_pickup:
+				audio_manager.play_health_pickup()
+			elif is_thruster_pickup:
+				audio_manager.play_fuel_pickup()
+			elif area is BulletPickup:
+				audio_manager.play_ammo_pickup()
 		if is_alive and (is_health_pickup or is_thruster_pickup):
 			_pickup_pulse_color = Color(0.15, 1.0, 0.3) if is_health_pickup else Color(1.0, 0.65, 0.05)
 			_pickup_pulse_remaining = _PICKUP_PULSE_DURATION
