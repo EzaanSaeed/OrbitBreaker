@@ -1,21 +1,18 @@
 class_name ThrusterBooster
 extends PowerUp
-## Pickup that temporarily strengthens vertical thrust. Does not affect world
-## scrolling speed.
-## Owner: Developer B (proposed). Source: Domain Model V3, §3.
+## Pickup that refills thruster fuel. Does not affect world scrolling speed.
+## Effect owner: Developer A (fuel rules).
 ##
-## Approved: 1.5x thrust; picking up another refreshes the duration instead of
-## stacking; the boost resets on death/restart (automatic with a scene reload).
+## Changed for the fuel update: this used to give a temporary 1.5× thrust boost.
+## Collecting it at full fuel still uses the pickup up (same as HealthBooster).
 
-@export var thrust_multiplier: float = 1.5
-@export var duration: float = 5.0
+## PROVISIONAL tuning: fuel restored per pickup (max_fuel is 100).
+@export var fuel_amount: float = 50.0
 
 
 func _ready() -> void:
-	assert(thrust_multiplier > 1.0)
-	assert(duration > 0.0)
+	assert(fuel_amount > 0.0)
 
 
-## Body as specified in Domain Model V3.
 func apply_effect(player: Spaceship) -> void:
-	player.apply_thrust_boost(thrust_multiplier, duration)
+	player.restore_fuel(fuel_amount)

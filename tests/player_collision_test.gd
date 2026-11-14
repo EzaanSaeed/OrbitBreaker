@@ -142,12 +142,15 @@ func _run() -> void:
 	_add_pickup(fixture, heal)
 	await _settle()
 	assert(heal.is_collected and player.health == 75)
+	# ThrusterBooster now refills fuel (+50, capped) instead of a 1.5x thrust boost.
+	player.fuel.refill(player.fuel.max_fuel)      # earlier thrust used some fuel
+	player.fuel.drain(14.0)                       # 5/s for 14 s -> 30 fuel left
 	var boost = load("res://scripts/thruster_booster.gd").new()
 	_add_pickup(fixture, boost)
 	await _settle()
-	assert(boost.is_collected and player.thrust_multiplier == 1.5 and player.boost_time_remaining == 5.0)
+	assert(boost.is_collected and is_equal_approx(player.fuel.fuel, 80.0))
 	player.area_entered.emit(boost)
-	assert(player.thrust_multiplier == 1.5 and player.boost_time_remaining == 5.0)
+	assert(is_equal_approx(player.fuel.fuel, 80.0) and player.thrust_multiplier == 1.0)
 	var unrelated := Area2D.new()
 	fixture.add_child(unrelated)
 	player.area_entered.emit(unrelated)
