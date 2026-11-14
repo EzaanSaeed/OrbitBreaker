@@ -17,7 +17,7 @@ signal restart_requested
 @onready var _score_value: Label       = $Layout/TopMargin/TopRows/Row1/Score/ScoreValue
 @onready var _ammo_value: Label        = $Layout/TopMargin/TopRows/Row2/Ammo/AmmoValue
 @onready var _fuel_bar: ProgressBar    = $Layout/TopMargin/TopRows/Row2/Fuel/FuelBar
-@onready var _fuel_value: Label        = $Layout/TopMargin/TopRows/Row2/Fuel/FuelValue
+@onready var _fuel_value: Label        = $Layout/TopMargin/TopRows/Row2/Fuel/FuelRow/FuelValue
 
 # ── Game-over references ─────────────────────────────────────────────────────
 @onready var _game_over: Control = $Layout/GameOverPanel
@@ -122,9 +122,9 @@ func update_health(current: int, maximum: int) -> void:
 	else:
 		_health_tween = create_tween()
 		_health_tween.tween_property(_health_bar, "value", float(current), 0.2) \
-			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	# Switch bar colour at ≤ 25 % health.
-	var is_crit: bool = current <= maximum / 4
+			.set_trans(Tween.TRANS_QUAD as Tween.TransitionType).set_ease(Tween.EASE_OUT as Tween.EaseType)
+	# Switch bar colour at <= 25 % health.
+	var is_crit: bool = float(current) <= float(maximum) * 0.25
 	_health_bar.add_theme_stylebox_override(
 		"fill", _health_fill_crit if is_crit else _health_fill_normal)
 

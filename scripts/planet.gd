@@ -47,9 +47,9 @@ func _draw() -> void:
 func get_gravity_at(ship_position: Vector2) -> float:
 	var offset: Vector2 = global_position - ship_position
 	var distance_squared: float = maxf(offset.length_squared(), min_distance_squared)
-	var gravity: float = offset.normalized().y * gravity_strength / distance_squared
-	assert(is_finite(gravity))
-	return gravity
+	var gravity_accel: float = offset.normalized().y * gravity_strength / distance_squared
+	assert(is_finite(gravity_accel))
+	return gravity_accel
 
 
 ## Scroll with the world.
