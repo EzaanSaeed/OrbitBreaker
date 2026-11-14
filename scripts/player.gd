@@ -23,6 +23,7 @@ var boost_time_remaining: float = 0.0
 var _fixed_x: float
 var _standalone: bool = false
 var _thrust_direction: float = 0.0
+var _processing_asteroids: Array[Asteroid] = []
 
 
 func _ready() -> void:
@@ -35,6 +36,8 @@ func _ready() -> void:
 		position = get_viewport_rect().size * Vector2(0.25, 0.5)
 	_fixed_x = position.x
 	_assert_state()
+	if not area_entered.is_connected(_on_area_entered):
+		area_entered.connect(_on_area_entered)
 	health_changed.emit(health, max_health)
 	queue_redraw()
 
@@ -204,3 +207,24 @@ func _ensure_input_actions() -> void:
 			var event := InputEventKey.new()
 			event.physical_keycode = key
 			InputMap.action_add_event(action, event)
+
+
+func _on_area_entered(area: Area2D) -> void:
+	# Deferred shape changes can leave already queued callbacks after death.
+	if not is_alive or not is_instance_valid(area):
+		return
+	if area is Planet:
+		die()
+	elif area is Asteroid:
+		if not area.is_active or area in _processing_asteroids:
+			return
+		# health_changed/player_died listeners may synchronously trigger another
+		# callback before deactivate() runs. Guard that reentrant interval too.
+		_processing_asteroids.append(area)
+		take_damage(area.get_collision_damage())
+		if is_instance_valid(area):
+			area.deactivate()
+		_processing_asteroids.erase(area)
+	elif area is PowerUp and not area.is_collected:
+		# collect() marks the pickup collected before applying its effect.
+		area.collect(self)
